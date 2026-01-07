@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Health Check</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <div style="text-align: center; padding: 50px;">
+        <h1 style="color: #22c55e;">✓ Application is Running</h1>
+        <p>Consent-First Sex platform is operational</p>
+        <div style="margin-top: 20px; font-size: 0.9em; color: #666;">
+            <p>Status: All systems operational</p>
+            <p>Last checked: <span id="timestamp"></span></p>
+        </div>
+    </div>
+    <script>
+        document.getElementById('timestamp').textContent = new Date().toISOString();
+    </script>
+</body>
+</html>
