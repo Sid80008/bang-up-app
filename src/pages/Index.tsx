@@ -2,13 +2,13 @@
 
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import AnonymousProfileCard from "@/components/AnonymousProfileCard";
-import MatchProfileCard from "@/components/MatchProfileCard";
+import MatchSwipeCarousel from "@/components/MatchSwipeCarousel"; // Import the new carousel component
 import AnonymousProfileForm from "@/components/AnonymousProfileForm";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import React, { useState } from "react";
-import { Link } from "react-router-dom"; // Import Link for navigation
+import { Link } from "react-router-dom";
 
 const Index = () => {
   const [userProfile, setUserProfile] = useState({
@@ -60,6 +60,30 @@ const Index = () => {
       locationRadius: "7 km",
       isVerified: true,
     },
+    {
+      id: "match4",
+      bodyType: "Curvy",
+      faceType: "Oval",
+      gender: "Female",
+      sexualOrientation: "Pansexual",
+      desiredPartnerPhysical: "Muscular, short",
+      sexualInterests: ["Voyeurism", "Exhibitionism"],
+      comfortLevel: "sex" as "chat only" | "make-out" | "sex",
+      locationRadius: "15 km",
+      isVerified: true,
+    },
+    {
+      id: "match5",
+      bodyType: "Athletic",
+      faceType: "Diamond",
+      gender: "Non-binary",
+      sexualOrientation: "Asexual",
+      desiredPartnerPhysical: "Any, kind eyes",
+      sexualInterests: ["Deep conversations", "Cuddling"],
+      comfortLevel: "chat only" as "chat only" | "make-out" | "sex",
+      locationRadius: "5 km",
+      isVerified: false,
+    },
   ];
 
   const handleLike = (id: string) => {
@@ -110,15 +134,12 @@ const Index = () => {
         <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Potential Matches</h2>
         <p className="text-lg text-gray-600 dark:text-gray-400">Swipe through anonymous profiles</p>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-6xl">
-        {potentialMatches.map((match) => (
-          <MatchProfileCard
-            key={match.id}
-            {...match}
-            onLike={handleLike}
-            onPass={handlePass}
-          />
-        ))}
+      <div className="w-full max-w-md"> {/* Container for the carousel */}
+        <MatchSwipeCarousel
+          matches={potentialMatches}
+          onLike={handleLike}
+          onPass={handlePass}
+        />
       </div>
       <MadeWithDyad />
     </div>
