@@ -1,19 +1,24 @@
 "use client";
 
 import { MadeWithDyad } from "@/components/made-with-dyad";
-import AnonymousProfileCard from "@/components/AnonymousProfileCard";
-import MatchSwipeCarousel from "@/components/MatchSwipeCarousel";
-import AnonymousProfileForm from "@/components/AnonymousProfileForm";
+import MyPreferencesCard from "@/components/MyPreferencesCard"; // Renamed import
+import DiscoverySwipeCarousel from "@/components/DiscoverySwipeCarousel"; // Renamed import
+import ProfileForm from "@/components/ProfileForm"; // Renamed import
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useSession } from "@/components/SessionContextProvider";
 import { supabase } from "@/integrations/supabase/client";
 
 type UserProfile = {
-  id: string; // Added id for the profile
+  id: string;
+  name: string;
+  age: number;
+  bio?: string;
+  bodyCount?: number;
+  photo_url?: string;
   bodyType: string;
   faceType: string;
   gender: string;
@@ -23,10 +28,14 @@ type UserProfile = {
   comfortLevel: "chat only" | "make-out" | "sex";
   locationRadius: string;
   isVerified: boolean;
+  latitude?: number;
+  longitude?: number;
+  isApprovedForVisibility?: boolean; // For potential matches, not user's own profile
 };
 
 const Index = () => {
   const { user, loading: sessionLoading } = useSession();
+  const navigate = useNavigate();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [potentialMatches, setPotentialMatches] = useState<UserProfile[]>([]);
   const [profileLoading, setProfileLoading] = useState(true);
@@ -49,6 +58,11 @@ const Index = () => {
       } else if (data) {
         setUserProfile({
           id: data.id,
+          name: data.name || "",
+          age: data.age || 0,
+          bio: data.bio || "",
+          bodyCount: data.body_count || 0,
+          photo_url: data.photo_url || "",
           bodyType: data.body_type || "",
           faceType: data.face_type || "",
           gender: data.gender || "",
@@ -58,10 +72,18 @@ const Index = () => {
           comfortLevel: (data.comfort_level as "chat only" | "make-out" | "sex") || "chat only",
           locationRadius: data.location_radius || "",
           isVerified: data.is_verified || false,
+          latitude: data.latitude || undefined,
+          longitude: data.longitude || undefined,
         });
       } else {
+        // Initialize with default values if no profile exists
         setUserProfile({
-          id: user.id, // Initialize with user ID even if no profile data
+          id: user.id,
+          name: "",
+          age: 0,
+          bio: "",
+          bodyCount: 0,
+          photo_url: "",
           bodyType: "",
           faceType: "",
           gender: "",
@@ -128,15 +150,23 @@ const Index = () => {
         })
         .map(profile => ({
           id: profile.id,
-          bodyType: profile.body_type || "",
-          faceType: profile.face_type || "",
-          gender: profile.gender || "",
-          sexualOrientation: profile.sexual_orientation || "",
-          desiredPartnerPhysical: profile.desired_partner_physical || "",
+          name: profile.name || "Anonymous",
+          age: profile.age || 0,
+          bio: profile.bio || "",
+          bodyCount: profile.body_count || 0,
+          photo_url: profile.photo_url || "",
+          bodyType: profile.body_type || "N/A",
+          faceType: profile.face_type || "N/A",
+          gender: profile.gender || "N/A",
+          sexualOrientation: profile.sexual_orientation || "N/A",
+          desiredPartnerPhysical: profile.desired_partner_physical || "N/A",
           sexualInterests: profile.sexual_interests || [],
           comfortLevel: (profile.comfort_level as "chat only" | "make-out" | "sex") || "chat only",
-          locationRadius: profile.location_radius || "",
+          locationRadius: profile.location_radius || "N/A",
           isVerified: profile.is_verified || false,
+          latitude: profile.latitude || undefined,
+          longitude: profile.longitude || undefined,
+          isApprovedForVisibility: false, // Default to false for discovery profiles
         }));
       setPotentialMatches(filteredMatches);
     }
@@ -192,10 +222,10 @@ const Index = () => {
         if (mutualLikeError && mutualLikeError.code !== 'PGRST116') {
           console.error("[IndexPage] Error checking for mutual like:", mutualLikeError);
         } else if (mutualLike) {
-          // Mutual like found, create a chat
+          // Mutual like found, create a chat and set visibility_approved
           const { data: chatData, error: chatError } = await supabase
             .from("chats")
-            .insert({ user1_id: user.id, user2_id: targetUserId })
+            .insert({ user1_id: user.id, user2_id: targetUserId, visibility_approved: true }) // Set visibility_approved to true
             .select()
             .single();
 
@@ -244,18 +274,18 @@ const Index = () => {
           Your preferences are ready!
         </p>
       </div>
-      {userProfile && <AnonymousProfileCard {...userProfile} />}
+      {userProfile && <MyPreferencesCard {...userProfile} />}
 
       <div className="flex space-x-4 mt-4">
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button>Edit My Preferences</Button> {/* Renamed */}
+            <Button>Edit My Preferences</Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Edit Preferences</DialogTitle> {/* Renamed */}
+              <DialogTitle>Edit Preferences</DialogTitle>
             </DialogHeader>
-            {userProfile && <AnonymousProfileForm initialData={userProfile} onSubmitSuccess={handleProfileUpdate} />}
+            {userProfile && <ProfileForm initialData={userProfile} onSubmitSuccess={handleProfileUpdate} />}
           </DialogContent>
         </Dialog>
         <Button asChild>
@@ -264,11 +294,11 @@ const Index = () => {
       </div>
 
       <div className="text-center mt-12 mb-4">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Discovery Profiles</h2> {/* Renamed */}
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Discovery Profiles</h2>
         <p className="text-lg text-gray-600 dark:text-gray-400">Swipe through profiles based on your interests</p>
       </div>
       <div className="w-full max-w-md">
-        <MatchSwipeCarousel
+        <DiscoverySwipeCarousel
           matches={potentialMatches}
           onLike={(id) => handleInteraction(id, 'like')}
           onPass={(id) => handleInteraction(id, 'pass')}

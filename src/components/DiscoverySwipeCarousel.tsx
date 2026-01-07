@@ -8,11 +8,16 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import MatchProfileCard from "./MatchProfileCard";
+import DiscoveryProfileCard from "./DiscoveryProfileCard"; // Renamed import
 import { toast } from "sonner";
 
 interface Match {
-  id: string; // Ensure ID is present for interaction
+  id: string;
+  name?: string;
+  age?: number;
+  bio?: string;
+  bodyCount?: number;
+  photo_url?: string;
   bodyType: string;
   faceType: string;
   gender: string;
@@ -22,15 +27,16 @@ interface Match {
   comfortLevel: "chat only" | "make-out" | "sex";
   locationRadius: string;
   isVerified: boolean;
+  isApprovedForVisibility: boolean; // New field
 }
 
-interface MatchSwipeCarouselProps {
+interface DiscoverySwipeCarouselProps { // Renamed interface
   matches: Match[];
   onLike: (id: string) => void;
   onPass: (id: string) => void;
 }
 
-const MatchSwipeCarousel: React.FC<MatchSwipeCarouselProps> = ({
+const DiscoverySwipeCarousel: React.FC<DiscoverySwipeCarouselProps> = ({ // Renamed component
   matches: initialMatches,
   onLike,
   onPass,
@@ -58,14 +64,14 @@ const MatchSwipeCarousel: React.FC<MatchSwipeCarouselProps> = ({
       // so we don't need to manually call scrollNext() here.
       // The next item will simply become the current one.
     } else if (currentMatches.length === 1) {
-      toast.info("No more discovery profiles for now! Check back later."); // Renamed
+      toast.info("No more discovery profiles for now! Check back later.");
     }
   }, [onLike, onPass, api, currentMatches.length]);
 
   if (currentMatches.length === 0) {
     return (
       <div className="text-center text-gray-500 dark:text-gray-400 text-lg p-8">
-        No more discovery profiles for now! Check back later. {/* Renamed */}
+        No more discovery profiles for now! Check back later.
       </div>
     );
   }
@@ -75,10 +81,11 @@ const MatchSwipeCarousel: React.FC<MatchSwipeCarouselProps> = ({
       <CarouselContent>
         {currentMatches.map((match) => (
           <CarouselItem key={match.id} className="flex justify-center">
-            <MatchProfileCard
+            <DiscoveryProfileCard // Renamed component
               {...match}
               onLike={() => handleAction(match.id, 'like')}
               onPass={() => handleAction(match.id, 'pass')}
+              isApprovedForVisibility={match.isApprovedForVisibility} // Pass the new prop
             />
           </CarouselItem>
         ))}
@@ -89,4 +96,4 @@ const MatchSwipeCarousel: React.FC<MatchSwipeCarouselProps> = ({
   );
 };
 
-export default MatchSwipeCarousel;
+export default DiscoverySwipeCarousel;

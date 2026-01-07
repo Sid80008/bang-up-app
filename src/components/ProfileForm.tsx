@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -23,9 +23,11 @@ import {
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/components/SessionContextProvider";
+import { v4 as uuidv4 } from 'uuid';
 
 const sexualInterestsOptions = [
   "Vanilla",
@@ -42,6 +44,10 @@ const sexualInterestsOptions = [
 ];
 
 const formSchema = z.object({
+  name: z.string().min(1, "Name is required").max(50, "Name must not exceed 50 characters"),
+  age: z.coerce.number().min(18, "You must be at least 18 years old").max(120, "Age seems too high"),
+  bio: z.string().max(500, "Bio must not exceed 500 characters").optional(),
+  bodyCount: z.coerce.number().min(0, "Body count cannot be negative").optional(),
   bodyType: z.string().min(1, "Body type is required"),
   faceType: z.string().min(1, "Face type is required"),
   gender: z.string().min(1, "Gender is required"),
@@ -52,37 +58,72 @@ const formSchema = z.object({
     required_error: "Comfort level is required",
   }),
   locationRadius: z.string().min(1, "Location radius is required"),
+  photo: z.any().optional(), // For file upload
 });
 
-interface AnonymousProfileFormProps {
-  initialData?: z.infer<typeof formSchema> & { id: string; isVerified?: boolean }; // Added id
-  onSubmitSuccess?: (data: z.infer<typeof formSchema> & { id: string; isVerified?: boolean }) => void; // Added id
+interface ProfileFormProps {
+  initialData?: z.infer<typeof formSchema> & { id: string; isVerified?: boolean; photo_url?: string; latitude?: number; longitude?: number };
+  onSubmitSuccess?: (data: z.infer<typeof formSchema> & { id: string; isVerified?: boolean; photo_url?: string; latitude?: number; longitude?: number }) => void;
 }
 
-const AnonymousProfileForm: React.FC<AnonymousProfileFormProps> = ({
+const ProfileForm: React.FC<ProfileFormProps> = ({
   initialData,
   onSubmitSuccess,
 }) => {
   const { user } = useSession();
+  const [currentPhotoUrl, setCurrentPhotoUrl] = useState(initialData?.photo_url || "");
+  const [latitude, setLatitude] = useState<number | null>(initialData?.latitude || null);
+  const [longitude, setLongitude] = useState<number | null>(initialData?.longitude || null);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData || {
-      bodyType: "",
-      faceType: "",
-      gender: "",
-      sexualOrientation: "",
-      desiredPartnerPhysical: "",
-      sexualInterests: [],
-      comfortLevel: "chat only",
-      locationRadius: "5 km",
+    defaultValues: {
+      name: initialData?.name || "",
+      age: initialData?.age || 18,
+      bio: initialData?.bio || "",
+      bodyCount: initialData?.body_count || 0,
+      bodyType: initialData?.bodyType || "",
+      faceType: initialData?.faceType || "",
+      gender: initialData?.gender || "",
+      sexualOrientation: initialData?.sexualOrientation || "",
+      desiredPartnerPhysical: initialData?.desiredPartnerPhysical || "",
+      sexualInterests: initialData?.sexualInterests || [],
+      comfortLevel: initialData?.comfortLevel || "chat only",
+      locationRadius: initialData?.locationRadius || "5 km",
+      photo: undefined,
     },
   });
 
   useEffect(() => {
     if (initialData) {
-      form.reset(initialData);
+      form.reset({
+        ...initialData,
+        bodyCount: initialData.body_count, // Map body_count from initialData
+        photo: undefined, // Ensure file input is reset
+      });
+      setCurrentPhotoUrl(initialData.photo_url || "");
+      setLatitude(initialData.latitude || null);
+      setLongitude(initialData.longitude || null);
     }
   }, [initialData, form]);
+
+  const handleLocationRequest = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLatitude(position.coords.latitude);
+          setLongitude(position.coords.longitude);
+          toast.success("Location captured!");
+        },
+        (error) => {
+          console.error("[ProfileForm] Error getting location:", error);
+          toast.error("Failed to get location. Please enable location services.");
+        }
+      );
+    } else {
+      toast.error("Geolocation is not supported by your browser.");
+    }
+  };
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     if (!user) {
@@ -90,8 +131,36 @@ const AnonymousProfileForm: React.FC<AnonymousProfileFormProps> = ({
       return;
     }
 
+    let photoUrl = currentPhotoUrl;
+
+    if (data.photo && data.photo.length > 0) {
+      const file = data.photo[0];
+      const fileExtension = file.name.split('.').pop();
+      const filePath = `${user.id}/${uuidv4()}.${fileExtension}`;
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('avatars') // Assuming a bucket named 'avatars' exists
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false,
+        });
+
+      if (uploadError) {
+        console.error("[ProfileForm] Error uploading photo:", uploadError);
+        toast.error("Failed to upload photo.");
+        return;
+      }
+
+      const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
+      photoUrl = publicUrlData.publicUrl;
+    }
+
     const profileData = {
       id: user.id,
+      name: data.name,
+      age: data.age,
+      bio: data.bio,
+      body_count: data.bodyCount,
       body_type: data.bodyType,
       face_type: data.faceType,
       gender: data.gender,
@@ -100,23 +169,78 @@ const AnonymousProfileForm: React.FC<AnonymousProfileFormProps> = ({
       sexual_interests: data.sexualInterests,
       comfort_level: data.comfortLevel,
       location_radius: data.locationRadius,
+      photo_url: photoUrl,
+      latitude: latitude,
+      longitude: longitude,
       updated_at: new Date().toISOString(),
     };
 
     const { error } = await supabase.from("profiles").upsert(profileData, { onConflict: 'id' });
 
     if (error) {
-      console.error("[AnonymousProfileForm] Error updating profile:", error);
-      toast.error("Failed to update your preferences."); // Renamed
+      console.error("[ProfileForm] Error updating profile:", error);
+      toast.error("Failed to update your preferences.");
     } else {
-      toast.success("Your preferences updated successfully!"); // Renamed
-      onSubmitSuccess?.({ ...data, id: user.id, isVerified: initialData?.isVerified });
+      toast.success("Your preferences updated successfully!");
+      onSubmitSuccess?.({ ...data, id: user.id, isVerified: initialData?.isVerified, photo_url: photoUrl, latitude, longitude });
     }
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-4">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Name</FormLabel>
+              <FormControl>
+                <Input placeholder="Your name" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="age"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Age</FormLabel>
+              <FormControl>
+                <Input type="number" placeholder="Your age" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="bio"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Bio</FormLabel>
+              <FormControl>
+                <Textarea placeholder="Tell us about yourself..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="bodyCount"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Body Count</FormLabel>
+              <FormControl>
+                <Input type="number" placeholder="Your body count" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="bodyType"
@@ -300,10 +424,40 @@ const AnonymousProfileForm: React.FC<AnonymousProfileFormProps> = ({
             </FormItem>
           )}
         />
+        <FormItem>
+          <FormLabel>Profile Photo</FormLabel>
+          <FormControl>
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={(e) => form.setValue("photo", e.target.files)}
+            />
+          </FormControl>
+          {currentPhotoUrl && (
+            <div className="mt-2">
+              <img src={currentPhotoUrl} alt="Current Profile" className="w-24 h-24 object-cover rounded-full" />
+            </div>
+          )}
+          <FormMessage />
+        </FormItem>
+        <FormItem>
+          <FormLabel>Location (Optional for matching)</FormLabel>
+          <div className="flex items-center space-x-2">
+            <Button type="button" onClick={handleLocationRequest} variant="outline">
+              Get My Location
+            </Button>
+            {latitude && longitude && (
+              <span className="text-sm text-muted-foreground">
+                Lat: {latitude.toFixed(4)}, Long: {longitude.toFixed(4)}
+              </span>
+            )}
+          </div>
+          <FormMessage />
+        </FormItem>
         <Button type="submit" className="w-full">Update Profile</Button>
       </form>
     </Form>
   );
 };
 
-export default AnonymousProfileForm;
+export default ProfileForm;

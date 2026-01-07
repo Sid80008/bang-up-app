@@ -5,7 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Heart, MessageSquare, HeartHandshake } from "lucide-react";
 
-type AnonymousProfileCardProps = {
+type MyPreferencesCardProps = {
+  name: string;
+  age: number;
+  bio?: string;
+  bodyCount?: number;
   bodyType: string;
   faceType: string;
   gender: string;
@@ -15,9 +19,14 @@ type AnonymousProfileCardProps = {
   comfortLevel: "chat only" | "make-out" | "sex";
   locationRadius: string;
   isVerified: boolean;
+  photo_url?: string;
 };
 
-const AnonymousProfileCard: React.FC<AnonymousProfileCardProps> = ({
+const MyPreferencesCard: React.FC<MyPreferencesCardProps> = ({
+  name,
+  age,
+  bio,
+  bodyCount,
   bodyType,
   faceType,
   gender,
@@ -27,6 +36,7 @@ const AnonymousProfileCard: React.FC<AnonymousProfileCardProps> = ({
   comfortLevel,
   locationRadius,
   isVerified,
+  photo_url,
 }) => {
   const getComfortLevelIcon = (level: string) => {
     switch (level) {
@@ -44,7 +54,7 @@ const AnonymousProfileCard: React.FC<AnonymousProfileCardProps> = ({
   return (
     <Card className="w-full max-w-md mx-auto shadow-lg rounded-lg overflow-hidden">
       <CardHeader className="bg-primary text-primary-foreground p-4 flex flex-row items-center justify-between">
-        <CardTitle className="text-xl font-bold">My Preferences</CardTitle> {/* Renamed */}
+        <CardTitle className="text-xl font-bold">My Preferences</CardTitle>
         {isVerified && (
           <Badge variant="secondary" className="bg-green-500 text-white">
             Verified
@@ -52,6 +62,23 @@ const AnonymousProfileCard: React.FC<AnonymousProfileCardProps> = ({
         )}
       </CardHeader>
       <CardContent className="p-6 space-y-4">
+        <div className="flex items-center space-x-4">
+          {photo_url && (
+            <img src={photo_url} alt="Profile" className="w-20 h-20 rounded-full object-cover" />
+          )}
+          <div>
+            <h3 className="text-xl font-semibold">{name}, {age}</h3>
+            {bio && <p className="text-sm text-muted-foreground mt-1">{bio}</p>}
+          </div>
+        </div>
+
+        {bodyCount !== undefined && (
+          <div>
+            <p className="text-sm text-muted-foreground">Body Count</p>
+            <p className="font-medium">{bodyCount}</p>
+          </div>
+        )}
+
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-sm text-muted-foreground">Body Type</p>
@@ -105,4 +132,4 @@ const AnonymousProfileCard: React.FC<AnonymousProfileCardProps> = ({
   );
 };
 
-export default AnonymousProfileCard;
+export default MyPreferencesCard;
