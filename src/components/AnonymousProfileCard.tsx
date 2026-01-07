@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Heart, MessageSquare, Kiss, Handshake } from "lucide-react";
 
-interface AnonymousProfileCardProps {
+// Changed from interface to type
+type AnonymousProfileCardProps = {
   bodyType: string;
   faceType: string;
   gender: string;
@@ -15,7 +16,7 @@ interface AnonymousProfileCardProps {
   comfortLevel: "chat only" | "make-out" | "sex";
   locationRadius: string;
   isVerified: boolean;
-}
+};
 
 const AnonymousProfileCard: React.FC<AnonymousProfileCardProps> = ({
   bodyType,
