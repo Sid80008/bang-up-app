@@ -33,7 +33,7 @@ type UserProfile = {
   isVerified: boolean;
   latitude?: number;
   longitude?: number;
-  isApprovedForVisibility?: boolean; // Make this optional to match Match type
+  isApprovedForVisibility: boolean; // Make this required to match Match type
 };
 
 const Index = () => {
