@@ -1,5 +1,4 @@
 "use client";
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,7 +30,7 @@ export const SessionContextProvider: React.FC<{ children: ReactNode }> = ({ chil
         setSession(currentSession);
         setUser(currentSession?.user || null);
         setLoading(false);
-
+        
         if (event === "SIGNED_IN") {
           // Check if user has completed profile
           const { data: profileData, error: profileError } = await supabase
@@ -39,11 +38,11 @@ export const SessionContextProvider: React.FC<{ children: ReactNode }> = ({ chil
             .select("name, age, body_type, face_type, gender, sexual_orientation, desired_partner_physical, sexual_interests, comfort_level, location_radius")
             .eq("id", currentSession?.user.id)
             .single();
-
+          
           if (profileError) {
             console.error("[SessionContext] Error fetching profile:", profileError);
           }
-
+          
           const isProfileCompleted = profileData && 
             profileData.name && 
             profileData.age && 
@@ -56,26 +55,23 @@ export const SessionContextProvider: React.FC<{ children: ReactNode }> = ({ chil
             profileData.sexual_interests.length > 0 && 
             profileData.comfort_level && 
             profileData.location_radius;
-
+          
           setProfileCompleted(!!isProfileCompleted);
-
+          
           // Check if user has completed AI verification
           const { data: verificationData, error: verificationError } = await supabase
             .from("profiles")
-            .select("face_photo_path, body_photo_path")
+            .select("is_verified")
             .eq("id", currentSession?.user.id)
             .single();
-
+          
           if (verificationError) {
             console.error("[SessionContext] Error fetching verification data:", verificationError);
           }
-
-          const isAiVerified = verificationData && 
-            verificationData.face_photo_path && 
-            verificationData.body_photo_path;
-
+          
+          const isAiVerified = verificationData && verificationData.is_verified;
           setAiVerified(!!isAiVerified);
-
+          
           // Redirect based on profile status
           if (location.pathname === "/login") {
             toast.success("Logged in successfully!");
@@ -102,7 +98,7 @@ export const SessionContextProvider: React.FC<{ children: ReactNode }> = ({ chil
       setSession(initialSession);
       setUser(initialSession?.user || null);
       setLoading(false);
-
+      
       if (!initialSession && location.pathname !== "/login") {
         navigate("/login");
       } else if (initialSession) {
@@ -112,11 +108,11 @@ export const SessionContextProvider: React.FC<{ children: ReactNode }> = ({ chil
           .select("name, age, body_type, face_type, gender, sexual_orientation, desired_partner_physical, sexual_interests, comfort_level, location_radius")
           .eq("id", initialSession.user.id)
           .single();
-
+        
         if (profileError) {
           console.error("[SessionContext] Error fetching profile:", profileError);
         }
-
+        
         const isProfileCompleted = profileData && 
           profileData.name && 
           profileData.age && 
@@ -129,26 +125,23 @@ export const SessionContextProvider: React.FC<{ children: ReactNode }> = ({ chil
           profileData.sexual_interests.length > 0 && 
           profileData.comfort_level && 
           profileData.location_radius;
-
+        
         setProfileCompleted(!!isProfileCompleted);
-
+        
         // Check AI verification
         const { data: verificationData, error: verificationError } = await supabase
           .from("profiles")
-          .select("face_photo_path, body_photo_path")
+          .select("is_verified")
           .eq("id", initialSession.user.id)
           .single();
-
+        
         if (verificationError) {
           console.error("[SessionContext] Error fetching verification data:", verificationError);
         }
-
-        const isAiVerified = verificationData && 
-          verificationData.face_photo_path && 
-          verificationData.body_photo_path;
-
+        
+        const isAiVerified = verificationData && verificationData.is_verified;
         setAiVerified(!!isAiVerified);
-
+        
         // Redirect if needed
         if (!isProfileCompleted && location.pathname !== "/profile-setup" && location.pathname !== "/login") {
           navigate("/profile-setup");

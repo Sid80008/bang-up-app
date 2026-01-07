@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSession } from "@/components/SessionContextProvider";
@@ -19,36 +18,34 @@ const ProfileSetup = () => {
       navigate("/login");
       return;
     }
-
+    
     // If profile is already completed, redirect to AI verification or home
     if (profileCompleted) {
       // Check AI verification status
       const checkAiVerification = async () => {
         const { data: verificationData, error } = await supabase
           .from("profiles")
-          .select("face_photo_path, body_photo_path")
+          .select("face_photo_path, body_photo_path, is_verified")
           .eq("id", user.id)
           .single();
-
+        
         if (error) {
           console.error("[ProfileSetup] Error checking AI verification:", error);
         }
-
-        const isAiVerified = verificationData && 
-          verificationData.face_photo_path && 
-          verificationData.body_photo_path;
-
+        
+        const isAiVerified = verificationData && verificationData.is_verified;
+        
         if (isAiVerified) {
           navigate("/");
         } else {
           navigate("/ai-verification");
         }
       };
-
+      
       checkAiVerification();
       return;
     }
-
+    
     // Load existing profile data if any
     const loadProfileData = async () => {
       const { data, error } = await supabase
@@ -56,7 +53,7 @@ const ProfileSetup = () => {
         .select("*")
         .eq("id", user.id)
         .single();
-
+      
       if (error && error.code !== 'PGRST116') {
         console.error("[ProfileSetup] Error loading profile:", error);
       } else if (data) {
@@ -66,7 +63,7 @@ const ProfileSetup = () => {
         });
       }
     };
-
+    
     loadProfileData();
   }, [user, profileCompleted, navigate]);
 
@@ -75,7 +72,7 @@ const ProfileSetup = () => {
       toast.error("You must be logged in to update your profile.");
       return;
     }
-
+    
     const profileData = {
       id: user.id,
       name: data.name,
@@ -92,11 +89,11 @@ const ProfileSetup = () => {
       location_radius: data.locationRadius,
       updated_at: new Date().toISOString(),
     };
-
+    
     const { error } = await supabase
       .from("profiles")
       .upsert(profileData, { onConflict: 'id' });
-
+    
     if (error) {
       console.error("[ProfileSetup] Error updating profile:", error);
       toast.error("Failed to update your preferences.");
@@ -131,10 +128,7 @@ const ProfileSetup = () => {
             </p>
           </CardHeader>
           <CardContent>
-            <ProfileForm 
-              initialData={initialData} 
-              onSubmitSuccess={handleProfileUpdate} 
-            />
+            <ProfileForm initialData={initialData} onSubmitSuccess={handleProfileUpdate} />
           </CardContent>
         </Card>
       </div>
