@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -24,6 +24,8 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useSession } from "@/components/SessionContextProvider";
 
 const sexualInterestsOptions = [
   "Vanilla",
@@ -53,14 +55,15 @@ const formSchema = z.object({
 });
 
 interface AnonymousProfileFormProps {
-  initialData?: z.infer<typeof formSchema>;
-  onSubmitSuccess?: (data: z.infer<typeof formSchema>) => void;
+  initialData?: z.infer<typeof formSchema> & { isVerified?: boolean };
+  onSubmitSuccess?: (data: z.infer<typeof formSchema> & { isVerified?: boolean }) => void;
 }
 
 const AnonymousProfileForm: React.FC<AnonymousProfileFormProps> = ({
   initialData,
   onSubmitSuccess,
 }) => {
+  const { user } = useSession();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {
@@ -75,10 +78,40 @@ const AnonymousProfileForm: React.FC<AnonymousProfileFormProps> = ({
     },
   });
 
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
-    console.log("Form submitted:", data);
-    toast.success("Anonymous profile updated successfully!");
-    onSubmitSuccess?.(data);
+  useEffect(() => {
+    if (initialData) {
+      form.reset(initialData);
+    }
+  }, [initialData, form]);
+
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    if (!user) {
+      toast.error("You must be logged in to update your profile.");
+      return;
+    }
+
+    const profileData = {
+      id: user.id,
+      body_type: data.bodyType,
+      face_type: data.faceType,
+      gender: data.gender,
+      sexual_orientation: data.sexualOrientation,
+      desired_partner_physical: data.desiredPartnerPhysical,
+      sexual_interests: data.sexualInterests,
+      comfort_level: data.comfortLevel,
+      location_radius: data.locationRadius,
+      updated_at: new Date().toISOString(),
+    };
+
+    const { error } = await supabase.from("profiles").upsert(profileData, { onConflict: 'id' });
+
+    if (error) {
+      console.error("[AnonymousProfileForm] Error updating profile:", error);
+      toast.error("Failed to update anonymous profile.");
+    } else {
+      toast.success("Anonymous profile updated successfully!");
+      onSubmitSuccess?.({ ...data, isVerified: initialData?.isVerified });
+    }
   };
 
   return (
