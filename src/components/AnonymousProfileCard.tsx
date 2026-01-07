@@ -3,7 +3,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Heart, MessageSquare, HeartHandshake } from "lucide-react"; // Changed Kiss to HeartHandshake
+import { MapPin, Heart, MessageSquare, HeartHandshake } from "lucide-react"; // Corrected import: removed Kiss and Handshake, using HeartHandshake
 
 // Changed from interface to type
 type AnonymousProfileCardProps = {
