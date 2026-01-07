@@ -3,7 +3,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Heart, MessageSquare, HeartHandshake } from "lucide-react";
+import { MapPin, Heart, MessageSquare, HeartHandshake, User, Sparkles } from "lucide-react";
 
 type MyPreferencesCardProps = {
   name: string;
@@ -52,9 +52,12 @@ const MyPreferencesCard: React.FC<MyPreferencesCardProps> = ({
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto shadow-lg rounded-lg overflow-hidden">
-      <CardHeader className="bg-primary text-primary-foreground p-4 flex flex-row items-center justify-between">
-        <CardTitle className="text-xl font-bold">My Preferences</CardTitle>
+    <Card className="w-full max-w-md mx-auto shadow-lg rounded-xl overflow-hidden border-2 border-primary/30 bg-gradient-to-b from-card to-secondary/30">
+      <CardHeader className="bg-gradient-to-r from-primary to-accent text-primary-foreground p-4 flex flex-row items-center justify-between">
+        <div className="flex items-center">
+          <Sparkles className="h-5 w-5 mr-2" />
+          <CardTitle className="text-xl font-bold">My Preferences</CardTitle>
+        </div>
         {isVerified && (
           <Badge variant="secondary" className="bg-green-500 text-white">
             Verified
@@ -63,12 +66,16 @@ const MyPreferencesCard: React.FC<MyPreferencesCardProps> = ({
       </CardHeader>
       <CardContent className="p-6 space-y-4">
         <div className="flex items-center space-x-4">
-          {photo_url && (
-            <img src={photo_url} alt="Profile" className="w-20 h-20 rounded-full object-cover" />
+          {photo_url ? (
+            <img src={photo_url} alt="Profile" className="w-20 h-20 rounded-full object-cover border-2 border-primary/20" />
+          ) : (
+            <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center border-2 border-primary/20">
+              <User className="text-muted-foreground" size={40} />
+            </div>
           )}
           <div>
             <h3 className="text-xl font-semibold">{name}, {age}</h3>
-            {bio && <p className="text-sm text-muted-foreground mt-1">{bio}</p>}
+            {bio && <p className="text-sm text-primary-foreground/80 mt-1">{bio}</p>}
           </div>
         </div>
 
@@ -107,7 +114,7 @@ const MyPreferencesCard: React.FC<MyPreferencesCardProps> = ({
           <p className="text-sm text-muted-foreground">Sexual Interests & Boundaries</p>
           <div className="flex flex-wrap gap-2 mt-1">
             {sexualInterests.map((interest, index) => (
-              <Badge key={index} variant="outline">
+              <Badge key={index} variant="outline" className="text-xs">
                 {interest}
               </Badge>
             ))}

@@ -3,7 +3,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Heart, MessageSquare, HeartHandshake, User } from "lucide-react";
+import { MapPin, Heart, MessageSquare, HeartHandshake, User, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface DiscoveryProfileCardProps {
@@ -61,9 +61,12 @@ const DiscoveryProfileCard: React.FC<DiscoveryProfileCardProps> = ({
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto shadow-lg rounded-lg overflow-hidden border-2 border-blue-300 dark:border-blue-700">
-      <CardHeader className="bg-blue-600 text-white p-4 flex flex-row items-center justify-between">
-        <CardTitle className="text-xl font-bold">Discovery Profile</CardTitle>
+    <Card className="w-full max-w-md mx-auto shadow-lg rounded-xl overflow-hidden border-2 border-primary/30 bg-gradient-to-b from-card to-secondary/30">
+      <CardHeader className="bg-gradient-to-r from-primary to-accent text-primary-foreground p-4 flex flex-row items-center justify-between">
+        <div className="flex items-center">
+          <Sparkles className="h-5 w-5 mr-2" />
+          <CardTitle className="text-xl font-bold">Discovery Profile</CardTitle>
+        </div>
         {isVerified && (
           <Badge variant="secondary" className="bg-green-500 text-white">
             Verified
@@ -74,20 +77,20 @@ const DiscoveryProfileCard: React.FC<DiscoveryProfileCardProps> = ({
         {isApprovedForVisibility ? (
           <div className="flex items-center space-x-4 mb-4">
             {photo_url ? (
-              <img src={photo_url} alt="Profile" className="w-24 h-24 rounded-full object-cover" />
+              <img src={photo_url} alt="Profile" className="w-24 h-24 rounded-full object-cover border-2 border-primary/20" />
             ) : (
-              <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center">
-                <User className="text-gray-500" size={48} />
+              <div className="w-24 h-24 rounded-full bg-secondary flex items-center justify-center border-2 border-primary/20">
+                <User className="text-muted-foreground" size={48} />
               </div>
             )}
             <div>
-              <h3 className="text-2xl font-semibold">{name}, {age}</h3>
-              {bio && <p className="text-sm text-gray-200 mt-1">{bio}</p>}
+              <h3 className="text-2xl font-semibold">{name}{age ? `, ${age}` : ''}</h3>
+              {bio && <p className="text-sm text-primary-foreground/80 mt-1">{bio}</p>}
             </div>
           </div>
         ) : (
-          <div className="flex items-center justify-center h-24 mb-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
-            <p className="text-gray-500 dark:text-gray-400 italic">Full profile hidden until match</p>
+          <div className="flex items-center justify-center h-24 mb-4 bg-secondary rounded-lg">
+            <p className="text-muted-foreground italic">Full profile hidden until match</p>
           </div>
         )}
 
@@ -126,7 +129,7 @@ const DiscoveryProfileCard: React.FC<DiscoveryProfileCardProps> = ({
           <p className="text-sm text-muted-foreground">Sexual Interests & Boundaries</p>
           <div className="flex flex-wrap gap-2 mt-1">
             {sexualInterests.map((interest, index) => (
-              <Badge key={index} variant="outline">
+              <Badge key={index} variant="outline" className="text-xs">
                 {interest}
               </Badge>
             ))}
@@ -146,9 +149,18 @@ const DiscoveryProfileCard: React.FC<DiscoveryProfileCardProps> = ({
             <span className="text-sm">{locationRadius}</span>
           </div>
         </div>
+
         <div className="flex justify-around mt-6">
-          <Button variant="destructive" onClick={() => onPass?.(id)}>Pass</Button>
-          <Button onClick={() => onLike?.(id)}>Like</Button>
+          <Button 
+            variant="outline" 
+            onClick={() => onPass?.(id)} 
+            className="border-destructive text-destructive hover:bg-destructive/10"
+          >
+            Pass
+          </Button>
+          <Button onClick={() => onLike?.(id)} className="bg-primary hover:bg-primary/90">
+            Like
+          </Button>
         </div>
       </CardContent>
     </Card>

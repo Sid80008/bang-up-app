@@ -5,10 +5,11 @@ import MatchListItem from "@/components/MatchListItem";
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Heart, Users } from "lucide-react";
 import { toast } from "sonner";
 import { useSession } from "@/components/SessionContextProvider";
 import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface Match {
   id: string; // This will be the other user's profile ID
@@ -48,7 +49,10 @@ const MatchesPage = () => {
       // Fetch chats where the current user is involved
       const { data: chats, error: chatsError } = await supabase
         .from("chats")
-        .select("*, user1:user1_id(id, name, age, bio, body_count, photo_url, body_type, face_type, gender, sexual_orientation, comfort_level, location_radius, is_verified), user2:user2_id(id, name, age, bio, body_count, photo_url, body_type, face_type, gender, sexual_orientation, comfort_level, location_radius, is_verified)")
+        .select(`*, 
+          user1:user1_id(id, name, age, bio, body_count, photo_url, body_type, face_type, gender, sexual_orientation, comfort_level, location_radius, is_verified),
+          user2:user2_id(id, name, age, bio, body_count, photo_url, body_type, face_type, gender, sexual_orientation, comfort_level, location_radius, is_verified)
+        `)
         .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`);
 
       if (chatsError) {
@@ -60,9 +64,9 @@ const MatchesPage = () => {
       }
 
       const processedMatches: Match[] = [];
+
       for (const chat of chats || []) {
         const otherUser = chat.user1.id === user.id ? chat.user2 : chat.user1;
-
         if (otherUser) {
           processedMatches.push({
             id: otherUser.id,
@@ -83,6 +87,7 @@ const MatchesPage = () => {
           });
         }
       }
+
       setConfirmedMatches(processedMatches);
       setLoadingMatches(false);
     };
@@ -98,19 +103,23 @@ const MatchesPage = () => {
   if (sessionLoading || loadingMatches) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <p className="text-lg text-gray-600 dark:text-gray-400">Loading matches...</p>
+        <p className="text-lg text-foreground">Loading your matches...</p>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 p-4 space-y-4">
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Your Matches</h1>
-        <p className="text-xl text-gray-600 dark:text-gray-400">Please log in to view your matches.</p>
-        <Button asChild>
-          <Link to="/login">Go to Login</Link>
-        </Button>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background to-secondary p-4 space-y-6">
+        <div className="text-center max-w-2xl">
+          <h1 className="text-4xl font-bold mb-4 text-foreground">Your Matches</h1>
+          <p className="text-xl mb-8 text-foreground/80">
+            Please log in to view your matches.
+          </p>
+          <Button asChild size="lg">
+            <Link to="/login">Go to Login</Link>
+          </Button>
+        </div>
         <MadeWithDyad />
       </div>
     );
@@ -119,40 +128,69 @@ const MatchesPage = () => {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
-        <p className="text-lg text-red-500 mb-4">{error}</p>
+        <p className="text-lg text-destructive mb-4">{error}</p>
         <Button onClick={() => navigate("/")}>
-          <ArrowLeft className="h-4 w-4 mr-2" /> Back to Home
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Home
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center bg-gray-100 dark:bg-gray-900 p-4">
+    <div className="min-h-screen flex flex-col items-center bg-gradient-to-b from-background to-secondary p-4">
       <div className="w-full max-w-4xl flex justify-start mb-6">
         <Button variant="outline" asChild>
           <Link to="/">
-            <ArrowLeft className="h-4 w-4 mr-2" /> Back to Home
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Home
           </Link>
         </Button>
       </div>
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white">Your Matches</h1>
-        <p className="text-xl text-gray-600 dark:text-gray-400">
-          Connect with people who share your interests and boundaries.
+
+      <div className="text-center mb-8 w-full max-w-4xl">
+        <h1 className="text-3xl md:text-4xl font-bold mb-2 text-foreground">Your Matches</h1>
+        <p className="text-lg text-foreground/80">
+          Connect with people who share your interests and boundaries
         </p>
       </div>
 
-      <div className="w-full max-w-4xl bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 space-y-4">
-        {confirmedMatches.length > 0 ? (
-          confirmedMatches.map((match) => (
-            <MatchListItem key={match.chatId} {...match} onChatClick={() => handleChatClick(match.chatId)} />
-          ))
-        ) : (
-          <p className="text-center text-gray-500 dark:text-gray-400">No matches yet. Keep swiping!</p>
-        )}
+      <Card className="w-full max-w-4xl bg-card/80 backdrop-blur-sm border-0 shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Heart className="h-5 w-5 mr-2 text-primary" />
+            Confirmed Connections
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="space-y-4 p-4">
+            {confirmedMatches.length > 0 ? (
+              confirmedMatches.map((match) => (
+                <MatchListItem
+                  key={match.chatId}
+                  {...match}
+                  onChatClick={() => handleChatClick(match.chatId)}
+                />
+              ))
+            ) : (
+              <div className="text-center py-12">
+                <Users className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
+                <h3 className="text-xl font-semibold mb-2 text-foreground">No matches yet</h3>
+                <p className="text-foreground/70 mb-4">
+                  Keep swiping to find your perfect match!
+                </p>
+                <Button asChild>
+                  <Link to="/">Discover More</Link>
+                </Button>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="mt-8">
+        <MadeWithDyad />
       </div>
-      <MadeWithDyad />
     </div>
   );
 };

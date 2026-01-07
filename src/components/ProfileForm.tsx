@@ -5,22 +5,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,6 +15,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/components/SessionContextProvider";
 import { v4 as uuidv4 } from 'uuid';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { User, MapPin, Heart, Sparkles } from "lucide-react";
 
 const sexualInterestsOptions = [
   "Vanilla",
@@ -62,14 +51,23 @@ const formSchema = z.object({
 });
 
 interface ProfileFormProps {
-  initialData?: z.infer<typeof formSchema> & { id: string; isVerified?: boolean; photo_url?: string; latitude?: number; longitude?: number };
-  onSubmitSuccess?: (data: z.infer<typeof formSchema> & { id: string; isVerified?: boolean; photo_url?: string; latitude?: number; longitude?: number }) => void;
+  initialData?: z.infer<typeof formSchema> & {
+    id: string;
+    isVerified?: boolean;
+    photo_url?: string;
+    latitude?: number;
+    longitude?: number;
+  };
+  onSubmitSuccess?: (data: z.infer<typeof formSchema> & {
+    id: string;
+    isVerified?: boolean;
+    photo_url?: string;
+    latitude?: number;
+    longitude?: number;
+  }) => void;
 }
 
-const ProfileForm: React.FC<ProfileFormProps> = ({
-  initialData,
-  onSubmitSuccess,
-}) => {
+const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, onSubmitSuccess }) => {
   const { user } = useSession();
   const [currentPhotoUrl, setCurrentPhotoUrl] = useState(initialData?.photo_url || "");
   const [latitude, setLatitude] = useState<number | null>(initialData?.latitude || null);
@@ -151,7 +149,9 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
         return;
       }
 
-      const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
+      const { data: publicUrlData } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
       photoUrl = publicUrlData.publicUrl;
     }
 
@@ -175,288 +175,367 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
       updated_at: new Date().toISOString(),
     };
 
-    const { error } = await supabase.from("profiles").upsert(profileData, { onConflict: 'id' });
+    const { error } = await supabase
+      .from("profiles")
+      .upsert(profileData, {
+        onConflict: 'id'
+      });
 
     if (error) {
       console.error("[ProfileForm] Error updating profile:", error);
       toast.error("Failed to update your preferences.");
     } else {
       toast.success("Your preferences updated successfully!");
-      onSubmitSuccess?.({ ...data, id: user.id, isVerified: initialData?.isVerified, photo_url: photoUrl, latitude, longitude });
+      onSubmitSuccess?.({
+        ...data,
+        id: user.id,
+        isVerified: initialData?.isVerified,
+        photo_url: photoUrl,
+        latitude,
+        longitude
+      });
     }
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-4">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Your name" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="age"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Age</FormLabel>
-              <FormControl>
-                <Input type="number" placeholder="Your age" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="bio"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Bio</FormLabel>
-              <FormControl>
-                <Textarea placeholder="Tell us about yourself..." {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="bodyCount"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Body Count</FormLabel>
-              <FormControl>
-                <Input type="number" placeholder="Your body count" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="bodyType"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Body Type</FormLabel>
-              <FormControl>
-                <Input placeholder="e.g., Athletic, Slim, Curvy" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="faceType"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Face Type</FormLabel>
-              <FormControl>
-                <Input placeholder="e.g., Oval, Square, Round" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="gender"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Gender</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select your gender" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="Male">Male</SelectItem>
-                  <SelectItem value="Female">Female</SelectItem>
-                  <SelectItem value="Non-binary">Non-binary</SelectItem>
-                  <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="sexualOrientation"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Sexual Orientation</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select your sexual orientation" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="Heterosexual">Heterosexual</SelectItem>
-                  <SelectItem value="Homosexual">Homosexual</SelectItem>
-                  <SelectItem value="Bisexual">Bisexual</SelectItem>
-                  <SelectItem value="Pansexual">Pansexual</SelectItem>
-                  <SelectItem value="Asexual">Asexual</SelectItem>
-                  <SelectItem value="Demisexual">Demisexual</SelectItem>
-                  <SelectItem value="Queer">Queer</SelectItem>
-                  <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="desiredPartnerPhysical"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Desired Partner (Physical Traits)</FormLabel>
-              <FormControl>
-                <Input placeholder="e.g., Tall, muscular, short, curvy" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="sexualInterests"
-          render={() => (
-            <FormItem>
-              <FormLabel>Sexual Interests & Boundaries</FormLabel>
-              <div className="grid grid-cols-2 gap-2">
-                {sexualInterestsOptions.map((item) => (
-                  <FormField
-                    key={item}
-                    control={form.control}
-                    name="sexualInterests"
-                    render={({ field }) => {
-                      return (
-                        <FormItem
-                          key={item}
-                          className="flex flex-row items-start space-x-3 space-y-0"
-                        >
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value?.includes(item)}
-                              onCheckedChange={(checked) => {
-                                return checked
-                                  ? field.onChange([...field.value, item])
-                                  : field.onChange(
-                                      field.value?.filter(
-                                        (value) => value !== item
-                                      )
-                                    );
-                              }}
-                            />
-                          </FormControl>
-                          <FormLabel className="font-normal">
-                            {item}
-                          </FormLabel>
-                        </FormItem>
-                      );
-                    }}
-                  />
-                ))}
-              </div>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="comfortLevel"
-          render={({ field }) => (
-            <FormItem className="space-y-3">
-              <FormLabel>Comfort Level</FormLabel>
-              <FormControl>
-                <RadioGroup
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  className="flex flex-col space-y-1"
-                >
-                  <FormItem className="flex items-center space-x-3 space-y-0">
-                    <FormControl>
-                      <RadioGroupItem value="chat only" />
-                    </FormControl>
-                    <FormLabel className="font-normal">Chat Only</FormLabel>
-                  </FormItem>
-                  <FormItem className="flex items-center space-x-3 space-y-0">
-                    <FormControl>
-                      <RadioGroupItem value="make-out" />
-                    </FormControl>
-                    <FormLabel className="font-normal">Make-out</FormLabel>
-                  </FormItem>
-                  <FormItem className="flex items-center space-x-3 space-y-0">
-                    <FormControl>
-                      <RadioGroupItem value="sex" />
-                    </FormControl>
-                    <FormLabel className="font-normal">Sex</FormLabel>
-                  </FormItem>
-                </RadioGroup>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="locationRadius"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Location Radius</FormLabel>
-              <FormControl>
-                <Input placeholder="e.g., 5 km, 10 miles" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormItem>
-          <FormLabel>Profile Photo</FormLabel>
-          <FormControl>
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={(e) => form.setValue("photo", e.target.files)}
-            />
-          </FormControl>
-          {currentPhotoUrl && (
-            <div className="mt-2">
-              <img src={currentPhotoUrl} alt="Current Profile" className="w-24 h-24 object-cover rounded-full" />
-            </div>
-          )}
-          <FormMessage />
-        </FormItem>
-        <FormItem>
-          <FormLabel>Location (Optional for matching)</FormLabel>
-          <div className="flex items-center space-x-2">
-            <Button type="button" onClick={handleLocationRequest} variant="outline">
-              Get My Location
-            </Button>
-            {latitude && longitude && (
-              <span className="text-sm text-muted-foreground">
-                Lat: {latitude.toFixed(4)}, Long: {longitude.toFixed(4)}
-              </span>
-            )}
+    <Card className="border-0 shadow-none">
+      <CardHeader className="text-center">
+        <div className="flex justify-center mb-2">
+          <div className="bg-primary/10 p-3 rounded-full">
+            <Sparkles className="h-6 w-6 text-primary" />
           </div>
-          <FormMessage />
-        </FormItem>
-        <Button type="submit" className="w-full">Update Profile</Button>
-      </form>
-    </Form>
+        </div>
+        <CardTitle className="text-2xl">Update Your Preferences</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Share your authentic self while maintaining your boundaries
+        </p>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Your name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="age"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Age</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="Your age" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="bio"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Bio</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Tell us about yourself..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="bodyCount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Body Count</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="Your body count" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div>
+                <FormLabel>Profile Photo</FormLabel>
+                <div className="flex items-center space-x-4">
+                  <div className="flex-shrink-0">
+                    {currentPhotoUrl ? (
+                      <img 
+                        src={currentPhotoUrl} 
+                        alt="Current Profile" 
+                        className="w-16 h-16 rounded-full object-cover border-2 border-primary/20"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center border-2 border-primary/20">
+                        <User className="text-muted-foreground" size={24} />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-grow">
+                    <FormControl>
+                      <Input 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={(e) => form.setValue("photo", e.target.files)} 
+                      />
+                    </FormControl>
+                  </div>
+                </div>
+                <FormMessage />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="bodyType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Body Type</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., Athletic, Slim, Curvy" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="faceType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Face Type</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., Oval, Square, Round" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="gender"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Gender</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select your gender" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Male">Male</SelectItem>
+                        <SelectItem value="Female">Female</SelectItem>
+                        <SelectItem value="Non-binary">Non-binary</SelectItem>
+                        <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="sexualOrientation"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Sexual Orientation</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select your sexual orientation" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Heterosexual">Heterosexual</SelectItem>
+                        <SelectItem value="Homosexual">Homosexual</SelectItem>
+                        <SelectItem value="Bisexual">Bisexual</SelectItem>
+                        <SelectItem value="Pansexual">Pansexual</SelectItem>
+                        <SelectItem value="Asexual">Asexual</SelectItem>
+                        <SelectItem value="Demisexual">Demisexual</SelectItem>
+                        <SelectItem value="Queer">Queer</SelectItem>
+                        <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="desiredPartnerPhysical"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Desired Partner (Physical Traits)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., Tall, muscular, short, curvy" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="sexualInterests"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Sexual Interests & Boundaries</FormLabel>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {sexualInterestsOptions.map((item) => (
+                      <FormField
+                        key={item}
+                        control={form.control}
+                        name="sexualInterests"
+                        render={({ field }) => {
+                          return (
+                            <FormItem
+                              key={item}
+                              className="flex flex-row items-start space-x-3 space-y-0"
+                            >
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value?.includes(item)}
+                                  onCheckedChange={(checked) => {
+                                    return checked
+                                      ? field.onChange([...field.value, item])
+                                      : field.onChange(
+                                        field.value?.filter(
+                                          (value) => value !== item
+                                        )
+                                      );
+                                  }}
+                                />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                {item}
+                              </FormLabel>
+                            </FormItem>
+                          );
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="comfortLevel"
+              render={({ field }) => (
+                <FormItem className="space-y-3">
+                  <FormLabel>Comfort Level</FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      className="flex flex-col space-y-2"
+                    >
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="chat only" />
+                        </FormControl>
+                        <FormLabel className="font-normal flex items-center">
+                          <MessageSquare className="h-4 w-4 mr-2" />
+                          Chat Only
+                        </FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="make-out" />
+                        </FormControl>
+                        <FormLabel className="font-normal flex items-center">
+                          <HeartHandshake className="h-4 w-4 mr-2" />
+                          Make-out
+                        </FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="sex" />
+                        </FormControl>
+                        <FormLabel className="font-normal flex items-center">
+                          <Heart className="h-4 w-4 mr-2" />
+                          Sex
+                        </FormLabel>
+                      </FormItem>
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="locationRadius"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Location Radius</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., 5 km, 10 miles" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div>
+                <FormLabel>Location (Optional for matching)</FormLabel>
+                <div className="flex items-center space-x-2">
+                  <Button 
+                    type="button" 
+                    onClick={handleLocationRequest} 
+                    variant="outline" 
+                    className="flex items-center"
+                  >
+                    <MapPin className="h-4 w-4 mr-2" />
+                    Get My Location
+                  </Button>
+                  {latitude && longitude && (
+                    <span className="text-sm text-muted-foreground">
+                      Lat: {latitude.toFixed(4)}, Long: {longitude.toFixed(4)}
+                    </span>
+                  )}
+                </div>
+                <FormMessage />
+              </div>
+            </div>
+
+            <Button type="submit" className="w-full">
+              Update Profile
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 };
 

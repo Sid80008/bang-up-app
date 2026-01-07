@@ -1,9 +1,9 @@
 "use client";
 
 import { MadeWithDyad } from "@/components/made-with-dyad";
-import MyPreferencesCard from "@/components/MyPreferencesCard"; // Renamed import
-import DiscoverySwipeCarousel from "@/components/DiscoverySwipeCarousel"; // Renamed import
-import ProfileForm from "@/components/ProfileForm"; // Renamed import
+import MyPreferencesCard from "@/components/MyPreferencesCard";
+import DiscoverySwipeCarousel from "@/components/DiscoverySwipeCarousel";
+import ProfileForm from "@/components/ProfileForm";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -11,6 +11,8 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSession } from "@/components/SessionContextProvider";
 import { supabase } from "@/integrations/supabase/client";
+import { Heart, Sparkles, UserCircle, Users } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type UserProfile = {
   id: string;
@@ -30,7 +32,7 @@ type UserProfile = {
   isVerified: boolean;
   latitude?: number;
   longitude?: number;
-  isApprovedForVisibility?: boolean; // For potential matches, not user's own profile
+  isApprovedForVisibility?: boolean;
 };
 
 const Index = () => {
@@ -131,8 +133,9 @@ const Index = () => {
       .from("profiles")
       .select("*")
       .neq("id", user.id)
-      .not("id", "in", `(${interactedUserIds.join(',')})`); // Exclude interacted users
+      .not("id", "in", `(${interactedUserIds.join(',')})`);
 
+    // Exclude interacted users
     if (profilesError) {
       console.error("[IndexPage] Error fetching potential matches:", profilesError);
       toast.error("Failed to load potential matches.");
@@ -168,6 +171,7 @@ const Index = () => {
           longitude: profile.longitude || undefined,
           isApprovedForVisibility: false, // Default to false for discovery profiles
         }));
+
       setPotentialMatches(filteredMatches);
     }
     setMatchesLoading(false);
@@ -198,11 +202,13 @@ const Index = () => {
       return;
     }
 
-    const { error } = await supabase.from("user_interactions").insert({
-      user_id: user.id,
-      target_user_id: targetUserId,
-      interaction_type: interactionType,
-    });
+    const { error } = await supabase
+      .from("user_interactions")
+      .insert({
+        user_id: user.id,
+        target_user_id: targetUserId,
+        interaction_type: interactionType,
+      });
 
     if (error) {
       console.error(`[IndexPage] Error recording ${interactionType}:`, error);
@@ -225,7 +231,11 @@ const Index = () => {
           // Mutual like found, create a chat and set visibility_approved
           const { data: chatData, error: chatError } = await supabase
             .from("chats")
-            .insert({ user1_id: user.id, user2_id: targetUserId, visibility_approved: true }) // Set visibility_approved to true
+            .insert({
+              user1_id: user.id,
+              user2_id: targetUserId,
+              visibility_approved: true
+            })
             .select()
             .single();
 
@@ -240,46 +250,95 @@ const Index = () => {
       } else {
         toast.info(`Passed on Discovery Profile ${targetUserId.substring(0, 8)}...`);
       }
+
       // Remove the interacted match from the current potential matches
-      setPotentialMatches((prevMatches) => prevMatches.filter((match) => match.id !== targetUserId));
+      setPotentialMatches((prevMatches) =>
+        prevMatches.filter((match) => match.id !== targetUserId)
+      );
     }
   };
 
   if (sessionLoading || profileLoading || matchesLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <p className="text-lg text-gray-600 dark:text-gray-400">Loading application data...</p>
+        <p className="text-lg text-foreground">Loading your experience...</p>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 p-4 space-y-4">
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Welcome</h1>
-        <p className="text-xl text-gray-600 dark:text-gray-400">Please log in to view your preferences and discovery profiles.</p>
-        <Button asChild>
-          <Link to="/login">Go to Login</Link>
-        </Button>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background to-secondary p-4 space-y-6">
+        <div className="text-center max-w-2xl">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">Welcome to Consent-First Sex</h1>
+          <p className="text-xl mb-8 text-foreground/80">
+            A safe space for meaningful connections based on mutual respect and clear boundaries.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button asChild size="lg" className="text-lg px-8 py-6 bg-primary hover:bg-primary/90">
+              <Link to="/login">Get Started</Link>
+            </Button>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 w-full max-w-4xl">
+          <Card className="bg-card/80 backdrop-blur-sm border-0 shadow-lg">
+            <CardHeader>
+              <Heart className="h-10 w-10 text-primary mb-2" />
+              <CardTitle>Respectful Connections</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-foreground/80">
+                Build relationships based on clear communication and mutual consent.
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="bg-card/80 backdrop-blur-sm border-0 shadow-lg">
+            <CardHeader>
+              <Sparkles className="h-10 w-10 text-primary mb-2" />
+              <CardTitle>Personal Boundaries</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-foreground/80">
+                Define and communicate your comfort levels clearly with every interaction.
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="bg-card/80 backdrop-blur-sm border-0 shadow-lg">
+            <CardHeader>
+              <UserCircle className="h-10 w-10 text-primary mb-2" />
+              <CardTitle>Authentic Profiles</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-foreground/80">
+                Express yourself genuinely while maintaining your privacy and safety.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
         <MadeWithDyad />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 p-4 space-y-8">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white">Welcome to Your App</h1>
-        <p className="text-xl text-gray-600 dark:text-gray-400">
-          Your preferences are ready!
+    <div className="min-h-screen flex flex-col items-center bg-gradient-to-b from-background to-secondary p-4 space-y-8">
+      <div className="text-center w-full max-w-4xl">
+        <h1 className="text-3xl md:text-4xl font-bold mb-2 text-foreground">Your Consent-First Experience</h1>
+        <p className="text-lg mb-6 text-foreground/80">
+          Manage your preferences and discover compatible connections
         </p>
       </div>
-      {userProfile && <MyPreferencesCard {...userProfile} />}
 
-      <div className="flex space-x-4 mt-4">
+      <div className="w-full max-w-4xl">
+        {userProfile && <MyPreferencesCard {...userProfile} />}
+      </div>
+
+      <div className="flex flex-wrap gap-4 justify-center mt-4">
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button>Edit My Preferences</Button>
+            <Button size="lg" className="px-6 py-3">
+              Edit My Preferences
+            </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
@@ -288,22 +347,29 @@ const Index = () => {
             {userProfile && <ProfileForm initialData={userProfile} onSubmitSuccess={handleProfileUpdate} />}
           </DialogContent>
         </Dialog>
-        <Button asChild>
-          <Link to="/matches">View My Matches</Link>
+        <Button asChild size="lg" className="px-6 py-3">
+          <Link to="/matches">
+            <Users className="h-4 w-4 mr-2" />
+            View My Matches
+          </Link>
         </Button>
       </div>
 
-      <div className="text-center mt-12 mb-4">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Discovery Profiles</h2>
-        <p className="text-lg text-gray-600 dark:text-gray-400">Swipe through profiles based on your interests</p>
+      <div className="text-center mt-12 mb-6 w-full max-w-4xl">
+        <h2 className="text-2xl md:text-3xl font-bold mb-2 text-foreground">Discovery Profiles</h2>
+        <p className="text-lg text-foreground/80">
+          Swipe through profiles based on your interests and boundaries
+        </p>
       </div>
-      <div className="w-full max-w-md">
+
+      <div className="w-full max-w-md mb-12">
         <DiscoverySwipeCarousel
           matches={potentialMatches}
           onLike={(id) => handleInteraction(id, 'like')}
           onPass={(id) => handleInteraction(id, 'pass')}
         />
       </div>
+
       <MadeWithDyad />
     </div>
   );

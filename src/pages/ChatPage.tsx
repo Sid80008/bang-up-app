@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, User } from "lucide-react";
+import { ArrowLeft, User, Heart } from "lucide-react";
 import ChatMessage from "@/components/ChatMessage";
 import ChatInput from "@/components/ChatInput";
 import { toast } from "sonner";
@@ -81,6 +81,7 @@ const ChatPage: React.FC = () => {
         }
       }
     };
+
     fetchUserAndChatDetails();
   }, [chatId]);
 
@@ -140,11 +141,13 @@ const ChatPage: React.FC = () => {
       return;
     }
 
-    const { error } = await supabase.from("messages").insert({
-      chat_id: chatId,
-      sender_id: currentUserId,
-      content,
-    });
+    const { error } = await supabase
+      .from("messages")
+      .insert({
+        chat_id: chatId,
+        sender_id: currentUserId,
+        content,
+      });
 
     if (error) {
       console.error("[ChatPage] Error sending message:", error);
@@ -155,7 +158,7 @@ const ChatPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <p className="text-lg text-gray-600 dark:text-gray-400">Loading chat...</p>
+        <p className="text-lg text-foreground">Loading your conversation...</p>
       </div>
     );
   }
@@ -163,9 +166,10 @@ const ChatPage: React.FC = () => {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
-        <p className="text-lg text-red-500 mb-4">{error}</p>
+        <p className="text-lg text-destructive mb-4">{error}</p>
         <Button onClick={() => navigate("/matches")}>
-          <ArrowLeft className="h-4 w-4 mr-2" /> Back to Matches
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Matches
         </Button>
       </div>
     );
@@ -174,38 +178,52 @@ const ChatPage: React.FC = () => {
   if (!chatId) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
-        <p className="text-lg text-red-500 mb-4">Chat ID not found.</p>
+        <p className="text-lg text-destructive mb-4">Chat ID not found.</p>
         <Button onClick={() => navigate("/matches")}>
-          <ArrowLeft className="h-4 w-4 mr-2" /> Back to Matches
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Matches
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-64px)] bg-gray-50 dark:bg-gray-950">
+    <div className="flex flex-col h-[calc(100vh-64px)] bg-gradient-to-b from-background to-secondary">
       <Card className="flex flex-col flex-grow rounded-none border-none shadow-none">
-        <CardHeader className="flex flex-row items-center justify-between p-4 border-b bg-background">
+        <CardHeader className="flex flex-row items-center justify-between p-4 border-b bg-card">
           <Button variant="ghost" onClick={() => navigate("/matches")}>
-            <ArrowLeft className="h-4 w-4 mr-2" /> Back
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
           </Button>
           <CardTitle className="text-xl font-bold flex items-center">
             {isVisibilityApproved && otherUserProfile?.photo_url ? (
-              <img src={otherUserProfile.photo_url} alt="Profile" className="w-8 h-8 rounded-full object-cover mr-2" />
+              <img 
+                src={otherUserProfile.photo_url} 
+                alt="Profile" 
+                className="w-8 h-8 rounded-full object-cover mr-2 border-2 border-primary/20"
+              />
             ) : (
-              <User className="h-8 w-8 rounded-full bg-gray-200 text-gray-500 p-1 mr-2" />
+              <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center mr-2 border-2 border-primary/20">
+                <User className="h-4 w-4 text-muted-foreground" />
+              </div>
             )}
-            {isVisibilityApproved && otherUserProfile?.name
-              ? otherUserProfile.name
-              : `Chat with Match ${chatId.substring(0, 8)}...`}
+            {isVisibilityApproved && otherUserProfile?.name ? (
+              otherUserProfile.name
+            ) : (
+              `Chat with Match ${chatId.substring(0, 8)}...`
+            )}
           </CardTitle>
-          <div className="w-16"></div>
+          <div className="w-16"></div> {/* Spacer for alignment */}
         </CardHeader>
         <CardContent className="flex-grow p-4 overflow-hidden">
           <ScrollArea className="h-full w-full pr-4">
             {messages.length === 0 ? (
-              <div className="flex items-center justify-center h-full">
-                <p className="text-gray-500 dark:text-gray-400">Start the conversation!</p>
+              <div className="flex flex-col items-center justify-center h-full">
+                <Heart className="h-16 w-16 text-muted-foreground/30 mb-4" />
+                <p className="text-muted-foreground text-lg">Start the conversation!</p>
+                <p className="text-muted-foreground/70 text-sm mt-2 text-center max-w-xs">
+                  This is a safe space for respectful communication based on mutual consent.
+                </p>
               </div>
             ) : (
               messages.map((msg) => (

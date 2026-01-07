@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom"; // Import useLocation
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import MatchesPage from "./pages/MatchesPage";
@@ -19,8 +19,9 @@ const AppContent = () => {
 
   return (
     <SessionContextProvider>
-      <div className="flex flex-col min-h-screen">
-        {showHeader && <Header />} {/* Conditionally render Header */}
+      <div className="flex flex-col min-h-screen bg-background text-foreground">
+        {showHeader && <Header />}
+        {/* Conditionally render Header */}
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Index />} />
@@ -42,7 +43,8 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AppContent /> {/* Wrap AppContent with BrowserRouter */}
+        <AppContent />
+        {/* Wrap AppContent with BrowserRouter */}
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
