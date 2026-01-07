@@ -55,8 +55,8 @@ const formSchema = z.object({
 });
 
 interface AnonymousProfileFormProps {
-  initialData?: z.infer<typeof formSchema> & { isVerified?: boolean };
-  onSubmitSuccess?: (data: z.infer<typeof formSchema> & { isVerified?: boolean }) => void;
+  initialData?: z.infer<typeof formSchema> & { id: string; isVerified?: boolean }; // Added id
+  onSubmitSuccess?: (data: z.infer<typeof formSchema> & { id: string; isVerified?: boolean }) => void; // Added id
 }
 
 const AnonymousProfileForm: React.FC<AnonymousProfileFormProps> = ({
@@ -107,10 +107,10 @@ const AnonymousProfileForm: React.FC<AnonymousProfileFormProps> = ({
 
     if (error) {
       console.error("[AnonymousProfileForm] Error updating profile:", error);
-      toast.error("Failed to update anonymous profile.");
+      toast.error("Failed to update your preferences."); // Renamed
     } else {
-      toast.success("Anonymous profile updated successfully!");
-      onSubmitSuccess?.({ ...data, isVerified: initialData?.isVerified });
+      toast.success("Your preferences updated successfully!"); // Renamed
+      onSubmitSuccess?.({ ...data, id: user.id, isVerified: initialData?.isVerified });
     }
   };
 

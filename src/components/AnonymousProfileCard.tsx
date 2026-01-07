@@ -3,9 +3,8 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Heart, MessageSquare, HeartHandshake } from "lucide-react"; // Ensured only valid icons are imported
+import { MapPin, Heart, MessageSquare, HeartHandshake } from "lucide-react";
 
-// Changed from interface to type
 type AnonymousProfileCardProps = {
   bodyType: string;
   faceType: string;
@@ -34,7 +33,7 @@ const AnonymousProfileCard: React.FC<AnonymousProfileCardProps> = ({
       case "chat only":
         return <MessageSquare className="h-4 w-4 mr-1" />;
       case "make-out":
-        return <HeartHandshake className="h-4 w-4 mr-1" />; // Using HeartHandshake
+        return <HeartHandshake className="h-4 w-4 mr-1" />;
       case "sex":
         return <Heart className="h-4 w-4 mr-1" />;
       default:
@@ -45,7 +44,7 @@ const AnonymousProfileCard: React.FC<AnonymousProfileCardProps> = ({
   return (
     <Card className="w-full max-w-md mx-auto shadow-lg rounded-lg overflow-hidden">
       <CardHeader className="bg-primary text-primary-foreground p-4 flex flex-row items-center justify-between">
-        <CardTitle className="text-xl font-bold">Anonymous Profile</CardTitle>
+        <CardTitle className="text-xl font-bold">My Preferences</CardTitle> {/* Renamed */}
         {isVerified && (
           <Badge variant="secondary" className="bg-green-500 text-white">
             Verified

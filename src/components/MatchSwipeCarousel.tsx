@@ -12,7 +12,7 @@ import MatchProfileCard from "./MatchProfileCard";
 import { toast } from "sonner";
 
 interface Match {
-  id: string;
+  id: string; // Ensure ID is present for interaction
   bodyType: string;
   faceType: string;
   gender: string;
@@ -38,6 +38,11 @@ const MatchSwipeCarousel: React.FC<MatchSwipeCarouselProps> = ({
   const [currentMatches, setCurrentMatches] = useState<Match[]>(initialMatches);
   const [api, setApi] = React.useState<any>(); // Embla Carousel API
 
+  // Update currentMatches when initialMatches prop changes (e.g., after profile update)
+  React.useEffect(() => {
+    setCurrentMatches(initialMatches);
+  }, [initialMatches]);
+
   const handleAction = useCallback((id: string, actionType: 'like' | 'pass') => {
     if (actionType === 'like') {
       onLike(id);
@@ -53,14 +58,14 @@ const MatchSwipeCarousel: React.FC<MatchSwipeCarouselProps> = ({
       // so we don't need to manually call scrollNext() here.
       // The next item will simply become the current one.
     } else if (currentMatches.length === 1) {
-      toast.info("No more potential matches for now! Check back later.");
+      toast.info("No more discovery profiles for now! Check back later."); // Renamed
     }
   }, [onLike, onPass, api, currentMatches.length]);
 
   if (currentMatches.length === 0) {
     return (
       <div className="text-center text-gray-500 dark:text-gray-400 text-lg p-8">
-        No more potential matches for now! Check back later.
+        No more discovery profiles for now! Check back later. {/* Renamed */}
       </div>
     );
   }

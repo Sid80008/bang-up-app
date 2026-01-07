@@ -3,7 +3,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Heart, MessageSquare, HeartHandshake } from "lucide-react"; // Ensured only valid icons are imported
+import { MapPin, Heart, MessageSquare, HeartHandshake } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface MatchProfileCardProps {
@@ -40,7 +40,7 @@ const MatchProfileCard: React.FC<MatchProfileCardProps> = ({
       case "chat only":
         return <MessageSquare className="h-4 w-4 mr-1" />;
       case "make-out":
-        return <HeartHandshake className="h-4 w-4 mr-1" />; // Using HeartHandshake
+        return <HeartHandshake className="h-4 w-4 mr-1" />;
       case "sex":
         return <Heart className="h-4 w-4 mr-1" />;
       default:
@@ -51,7 +51,7 @@ const MatchProfileCard: React.FC<MatchProfileCardProps> = ({
   return (
     <Card className="w-full max-w-md mx-auto shadow-lg rounded-lg overflow-hidden border-2 border-blue-300 dark:border-blue-700">
       <CardHeader className="bg-blue-600 text-white p-4 flex flex-row items-center justify-between">
-        <CardTitle className="text-xl font-bold">Potential Match</CardTitle>
+        <CardTitle className="text-xl font-bold">Discovery Profile</CardTitle> {/* Renamed */}
         {isVerified && (
           <Badge variant="secondary" className="bg-green-500 text-white">
             Verified
