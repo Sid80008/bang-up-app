@@ -19,7 +19,7 @@ type MyPreferencesCardProps = {
   comfortLevel: "chat only" | "make-out" | "sex";
   locationRadius: string;
   isVerified: boolean;
-  photo_url?: string;
+  // Removed photo_url
 };
 
 const MyPreferencesCard: React.FC<MyPreferencesCardProps> = ({
@@ -36,7 +36,7 @@ const MyPreferencesCard: React.FC<MyPreferencesCardProps> = ({
   comfortLevel,
   locationRadius,
   isVerified,
-  photo_url,
+  // Removed photo_url
 }) => {
   const getComfortLevelIcon = (level: string) => {
     switch (level) {
@@ -66,13 +66,9 @@ const MyPreferencesCard: React.FC<MyPreferencesCardProps> = ({
       </CardHeader>
       <CardContent className="p-6 space-y-4">
         <div className="flex items-center space-x-4">
-          {photo_url ? (
-            <img src={photo_url} alt="Profile" className="w-20 h-20 rounded-full object-cover border-2 border-primary/20" />
-          ) : (
-            <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center border-2 border-primary/20">
-              <User className="text-muted-foreground" size={40} />
-            </div>
-          )}
+          <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center border-2 border-primary/20">
+            <User className="text-muted-foreground" size={40} />
+          </div>
           <div>
             <h3 className="text-xl font-semibold">{name}, {age}</h3>
             {bio && <p className="text-sm text-primary-foreground/80 mt-1">{bio}</p>}

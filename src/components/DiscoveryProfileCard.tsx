@@ -8,11 +8,11 @@ import { Button } from "@/components/ui/button";
 
 interface DiscoveryProfileCardProps {
   id: string;
-  name?: string; // New field, optional
-  age?: number; // New field, optional
-  bio?: string; // New field, optional
-  bodyCount?: number; // New field, optional
-  photo_url?: string; // New field, optional
+  name?: string;
+  age?: number;
+  bio?: string;
+  bodyCount?: number;
+  // Removed photo_url
   bodyType: string;
   faceType: string;
   gender: string;
@@ -22,7 +22,7 @@ interface DiscoveryProfileCardProps {
   comfortLevel: "chat only" | "make-out" | "sex";
   locationRadius: string;
   isVerified: boolean;
-  isApprovedForVisibility: boolean; // New prop to control visibility
+  isApprovedForVisibility: boolean;
   onLike?: (id: string) => void;
   onPass?: (id: string) => void;
 }
@@ -33,7 +33,7 @@ const DiscoveryProfileCard: React.FC<DiscoveryProfileCardProps> = ({
   age,
   bio,
   bodyCount,
-  photo_url,
+  // Removed photo_url
   bodyType,
   faceType,
   gender,
@@ -76,13 +76,9 @@ const DiscoveryProfileCard: React.FC<DiscoveryProfileCardProps> = ({
       <CardContent className="p-6 space-y-4">
         {isApprovedForVisibility ? (
           <div className="flex items-center space-x-4 mb-4">
-            {photo_url ? (
-              <img src={photo_url} alt="Profile" className="w-24 h-24 rounded-full object-cover border-2 border-primary/20" />
-            ) : (
-              <div className="w-24 h-24 rounded-full bg-secondary flex items-center justify-center border-2 border-primary/20">
-                <User className="text-muted-foreground" size={48} />
-              </div>
-            )}
+            <div className="w-24 h-24 rounded-full bg-secondary flex items-center justify-center border-2 border-primary/20">
+              <User className="text-muted-foreground" size={48} />
+            </div>
             <div>
               <h3 className="text-2xl font-semibold">{name}{age ? `, ${age}` : ''}</h3>
               {bio && <p className="text-sm text-primary-foreground/80 mt-1">{bio}</p>}

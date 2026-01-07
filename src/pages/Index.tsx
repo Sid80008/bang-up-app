@@ -4,6 +4,7 @@ import { MadeWithDyad } from "@/components/made-with-dyad";
 import MyPreferencesCard from "@/components/MyPreferencesCard";
 import DiscoverySwipeCarousel from "@/components/DiscoverySwipeCarousel";
 import ProfileForm from "@/components/ProfileForm";
+import AIVerification from "@/components/AIVerification";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -11,7 +12,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSession } from "@/components/SessionContextProvider";
 import { supabase } from "@/integrations/supabase/client";
-import { Heart, Sparkles, UserCircle, Users } from "lucide-react";
+import { Heart, Sparkles, UserCircle, Users, Camera } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type UserProfile = {
@@ -20,7 +21,7 @@ type UserProfile = {
   age: number;
   bio?: string;
   bodyCount?: number;
-  photo_url?: string;
+  // Removed photo_url
   bodyType: string;
   faceType: string;
   gender: string;
@@ -43,6 +44,7 @@ const Index = () => {
   const [profileLoading, setProfileLoading] = useState(true);
   const [matchesLoading, setMatchesLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isVerificationDialogOpen, setIsVerificationDialogOpen] = useState(false);
 
   const fetchUserProfile = async () => {
     if (user) {
@@ -64,7 +66,7 @@ const Index = () => {
           age: data.age || 0,
           bio: data.bio || "",
           bodyCount: data.body_count || 0,
-          photo_url: data.photo_url || "",
+          // Removed photo_url
           bodyType: data.body_type || "",
           faceType: data.face_type || "",
           gender: data.gender || "",
@@ -85,7 +87,7 @@ const Index = () => {
           age: 0,
           bio: "",
           bodyCount: 0,
-          photo_url: "",
+          // Removed photo_url
           bodyType: "",
           faceType: "",
           gender: "",
@@ -157,7 +159,7 @@ const Index = () => {
           age: profile.age || 0,
           bio: profile.bio || "",
           bodyCount: profile.body_count || 0,
-          photo_url: profile.photo_url || "",
+          // Removed photo_url
           bodyType: profile.body_type || "N/A",
           faceType: profile.face_type || "N/A",
           gender: profile.gender || "N/A",
@@ -347,6 +349,22 @@ const Index = () => {
             {userProfile && <ProfileForm initialData={userProfile} onSubmitSuccess={handleProfileUpdate} />}
           </DialogContent>
         </Dialog>
+        
+        <Dialog open={isVerificationDialogOpen} onOpenChange={setIsVerificationDialogOpen}>
+          <DialogTrigger asChild>
+            <Button size="lg" className="px-6 py-3" variant="outline">
+              <Camera className="h-4 w-4 mr-2" />
+              AI Verification
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>AI Profile Verification</DialogTitle>
+            </DialogHeader>
+            <AIVerification />
+          </DialogContent>
+        </Dialog>
+        
         <Button asChild size="lg" className="px-6 py-3">
           <Link to="/matches">
             <Users className="h-4 w-4 mr-2" />

@@ -16,11 +16,11 @@ interface MatchListItemProps {
   comfortLevel: "chat only" | "make-out" | "sex";
   locationRadius: string;
   isVerified: boolean;
-  chatId: string; // Added chatId prop
+  chatId: string;
   name?: string;
   age?: number;
-  photo_url?: string;
-  onChatClick?: (chatId: string) => void; // Changed to accept chatId
+  // Removed photo_url
+  onChatClick?: (chatId: string) => void;
 }
 
 const MatchListItem: React.FC<MatchListItemProps> = ({
@@ -32,10 +32,10 @@ const MatchListItem: React.FC<MatchListItemProps> = ({
   comfortLevel,
   locationRadius,
   isVerified,
-  chatId, // Destructure chatId
+  chatId,
   name,
   age,
-  photo_url,
+  // Removed photo_url
   onChatClick,
 }) => {
   const getComfortLevelIcon = (level: string) => {
@@ -53,23 +53,15 @@ const MatchListItem: React.FC<MatchListItemProps> = ({
 
   const handleChat = () => {
     toast.info(`Initiating chat with ${name || `match ${id.substring(0, 8)}`}...`);
-    onChatClick?.(chatId); // Pass chatId to onChatClick
+    onChatClick?.(chatId);
   };
 
   return (
     <Card className="w-full p-4 flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0 sm:space-x-4 border-b last:border-b-0 hover:bg-secondary/50 transition-colors">
       <div className="flex items-center mb-3 sm:mb-0">
-        {photo_url ? (
-          <img 
-            src={photo_url} 
-            alt="Profile" 
-            className="w-16 h-16 rounded-full object-cover mr-4 border-2 border-primary/20"
-          />
-        ) : (
-          <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mr-4 border-2 border-primary/20">
-            <User className="text-muted-foreground" size={24} />
-          </div>
-        )}
+        <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mr-4 border-2 border-primary/20">
+          <User className="text-muted-foreground" size={24} />
+        </div>
         <div>
           <h3 className="text-lg font-semibold">
             {name ? `${name}${age ? `, ${age}` : ''}` : `Match ${id.substring(0, 8)}`}

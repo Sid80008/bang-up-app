@@ -12,12 +12,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface Match {
-  id: string; // This will be the other user's profile ID
+  id: string;
   name?: string;
   age?: number;
   bio?: string;
   bodyCount?: number;
-  photo_url?: string;
+  // Removed photo_url
   bodyType: string;
   faceType: string;
   gender: string;
@@ -26,7 +26,7 @@ interface Match {
   locationRadius: string;
   isVerified: boolean;
   chatId: string;
-  isApprovedForVisibility: boolean; // New field
+  isApprovedForVisibility: boolean;
 }
 
 const MatchesPage = () => {
@@ -50,8 +50,8 @@ const MatchesPage = () => {
       const { data: chats, error: chatsError } = await supabase
         .from("chats")
         .select(`*, 
-          user1:user1_id(id, name, age, bio, body_count, photo_url, body_type, face_type, gender, sexual_orientation, comfort_level, location_radius, is_verified),
-          user2:user2_id(id, name, age, bio, body_count, photo_url, body_type, face_type, gender, sexual_orientation, comfort_level, location_radius, is_verified)
+          user1:user1_id(id, name, age, bio, body_count, body_type, face_type, gender, sexual_orientation, comfort_level, location_radius, is_verified),
+          user2:user2_id(id, name, age, bio, body_count, body_type, face_type, gender, sexual_orientation, comfort_level, location_radius, is_verified)
         `)
         .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`);
 
@@ -74,7 +74,7 @@ const MatchesPage = () => {
             age: otherUser.age || 0,
             bio: otherUser.bio || "",
             bodyCount: otherUser.body_count || 0,
-            photo_url: otherUser.photo_url || "",
+            // Removed photo_url
             bodyType: otherUser.body_type || "N/A",
             faceType: otherUser.face_type || "N/A",
             gender: otherUser.gender || "N/A",
@@ -83,7 +83,7 @@ const MatchesPage = () => {
             locationRadius: otherUser.location_radius || "N/A",
             isVerified: otherUser.is_verified || false,
             chatId: chat.id,
-            isApprovedForVisibility: chat.visibility_approved, // Get from chat table
+            isApprovedForVisibility: chat.visibility_approved,
           });
         }
       }

@@ -14,7 +14,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/components/SessionContextProvider";
-import { v4 as uuidv4 } from 'uuid';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, MapPin, Heart, Sparkles } from "lucide-react";
 
@@ -32,6 +31,15 @@ const sexualInterestsOptions = [
   "Exhibitionism",
 ];
 
+// Predefined options for body types and face types
+const bodyTypeOptions = [
+  "Slim", "Athletic", "Average", "Curvy", "Muscular", "Pear-shaped", "Apple-shaped", "Hourglass"
+];
+
+const faceTypeOptions = [
+  "Oval", "Round", "Square", "Heart-shaped", "Diamond-shaped", "Long", "Rectangular"
+];
+
 const formSchema = z.object({
   name: z.string().min(1, "Name is required").max(50, "Name must not exceed 50 characters"),
   age: z.coerce.number().min(18, "You must be at least 18 years old").max(120, "Age seems too high"),
@@ -47,21 +55,21 @@ const formSchema = z.object({
     required_error: "Comfort level is required",
   }),
   locationRadius: z.string().min(1, "Location radius is required"),
-  photo: z.any().optional(), // For file upload
+  // Removed photo field
 });
 
 interface ProfileFormProps {
   initialData?: z.infer<typeof formSchema> & {
     id: string;
     isVerified?: boolean;
-    photo_url?: string;
+    // Removed photo_url
     latitude?: number;
     longitude?: number;
   };
   onSubmitSuccess?: (data: z.infer<typeof formSchema> & {
     id: string;
     isVerified?: boolean;
-    photo_url?: string;
+    // Removed photo_url
     latitude?: number;
     longitude?: number;
   }) => void;
@@ -69,7 +77,6 @@ interface ProfileFormProps {
 
 const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, onSubmitSuccess }) => {
   const { user } = useSession();
-  const [currentPhotoUrl, setCurrentPhotoUrl] = useState(initialData?.photo_url || "");
   const [latitude, setLatitude] = useState<number | null>(initialData?.latitude || null);
   const [longitude, setLongitude] = useState<number | null>(initialData?.longitude || null);
 
@@ -88,7 +95,6 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, onSubmitSuccess 
       sexualInterests: initialData?.sexualInterests || [],
       comfortLevel: initialData?.comfortLevel || "chat only",
       locationRadius: initialData?.locationRadius || "5 km",
-      photo: undefined,
     },
   });
 
@@ -97,9 +103,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, onSubmitSuccess 
       form.reset({
         ...initialData,
         bodyCount: initialData.body_count, // Map body_count from initialData
-        photo: undefined, // Ensure file input is reset
       });
-      setCurrentPhotoUrl(initialData.photo_url || "");
       setLatitude(initialData.latitude || null);
       setLongitude(initialData.longitude || null);
     }
@@ -129,32 +133,6 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, onSubmitSuccess 
       return;
     }
 
-    let photoUrl = currentPhotoUrl;
-
-    if (data.photo && data.photo.length > 0) {
-      const file = data.photo[0];
-      const fileExtension = file.name.split('.').pop();
-      const filePath = `${user.id}/${uuidv4()}.${fileExtension}`;
-
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('avatars') // Assuming a bucket named 'avatars' exists
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false,
-        });
-
-      if (uploadError) {
-        console.error("[ProfileForm] Error uploading photo:", uploadError);
-        toast.error("Failed to upload photo.");
-        return;
-      }
-
-      const { data: publicUrlData } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-      photoUrl = publicUrlData.publicUrl;
-    }
-
     const profileData = {
       id: user.id,
       name: data.name,
@@ -169,7 +147,6 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, onSubmitSuccess 
       sexual_interests: data.sexualInterests,
       comfort_level: data.comfortLevel,
       location_radius: data.locationRadius,
-      photo_url: photoUrl,
       latitude: latitude,
       longitude: longitude,
       updated_at: new Date().toISOString(),
@@ -190,7 +167,6 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, onSubmitSuccess 
         ...data,
         id: user.id,
         isVerified: initialData?.isVerified,
-        photo_url: photoUrl,
         latitude,
         longitude
       });
@@ -276,29 +252,16 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, onSubmitSuccess 
                 <FormLabel>Profile Photo</FormLabel>
                 <div className="flex items-center space-x-4">
                   <div className="flex-shrink-0">
-                    {currentPhotoUrl ? (
-                      <img 
-                        src={currentPhotoUrl} 
-                        alt="Current Profile" 
-                        className="w-16 h-16 rounded-full object-cover border-2 border-primary/20"
-                      />
-                    ) : (
-                      <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center border-2 border-primary/20">
-                        <User className="text-muted-foreground" size={24} />
-                      </div>
-                    )}
+                    <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center border-2 border-primary/20">
+                      <User className="text-muted-foreground" size={24} />
+                    </div>
                   </div>
                   <div className="flex-grow">
-                    <FormControl>
-                      <Input 
-                        type="file" 
-                        accept="image/*" 
-                        onChange={(e) => form.setValue("photo", e.target.files)} 
-                      />
-                    </FormControl>
+                    <p className="text-sm text-muted-foreground">
+                      Photo upload temporarily disabled
+                    </p>
                   </div>
                 </div>
-                <FormMessage />
               </div>
             </div>
 
@@ -309,9 +272,20 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, onSubmitSuccess 
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Body Type</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Athletic, Slim, Curvy" {...field} />
-                    </FormControl>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select your body type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {bodyTypeOptions.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -323,9 +297,20 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, onSubmitSuccess 
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Face Type</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Oval, Square, Round" {...field} />
-                    </FormControl>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select your face type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {faceTypeOptions.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
