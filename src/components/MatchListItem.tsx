@@ -4,7 +4,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, MessageSquare, Heart, HeartHandshake } from "lucide-react"; // Changed Kiss to HeartHandshake
+import { MapPin, MessageSquare, Heart, HeartHandshake } from "lucide-react"; // Ensured only valid icons are imported
 import { toast } from "sonner";
 
 interface MatchListItemProps {

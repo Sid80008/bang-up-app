@@ -3,7 +3,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Heart, MessageSquare, HeartHandshake } from "lucide-react"; // Corrected import: removed Kiss and Handshake, using HeartHandshake
+import { MapPin, Heart, MessageSquare, HeartHandshake } from "lucide-react"; // Ensured only valid icons are imported
 
 // Changed from interface to type
 type AnonymousProfileCardProps = {

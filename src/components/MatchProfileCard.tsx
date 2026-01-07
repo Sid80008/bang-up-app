@@ -3,8 +3,8 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Heart, MessageSquare, HeartHandshake } from "lucide-react"; // Changed Kiss to HeartHandshake
-import { Button } from "@/components/ui/button"; // Assuming a Button component exists
+import { MapPin, Heart, MessageSquare, HeartHandshake } from "lucide-react"; // Ensured only valid icons are imported
+import { Button } from "@/components/ui/button";
 
 interface MatchProfileCardProps {
   id: string;
