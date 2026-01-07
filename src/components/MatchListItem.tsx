@@ -4,7 +4,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, MessageSquare, Heart, HeartHandshake, User } from "lucide-react";
+import { MapPin, MessageSquare, Heart, HeartHandshake, User, Circle } from "lucide-react";
 import { toast } from "sonner";
 
 interface MatchListItemProps {
@@ -21,6 +21,7 @@ interface MatchListItemProps {
   age?: number;
   // Removed photo_url
   onChatClick?: (chatId: string) => void;
+  isOnline?: boolean; // New prop for online status
 }
 
 const MatchListItem: React.FC<MatchListItemProps> = ({
@@ -37,6 +38,7 @@ const MatchListItem: React.FC<MatchListItemProps> = ({
   age,
   // Removed photo_url
   onChatClick,
+  isOnline = false, // Default to false
 }) => {
   const getComfortLevelIcon = (level: string) => {
     switch (level) {
@@ -63,9 +65,17 @@ const MatchListItem: React.FC<MatchListItemProps> = ({
           <User className="text-muted-foreground" size={24} />
         </div>
         <div>
-          <h3 className="text-lg font-semibold">
-            {name ? `${name}${age ? `, ${age}` : ''}` : `Match ${id.substring(0, 8)}`}
-          </h3>
+          <div className="flex items-center">
+            <h3 className="text-lg font-semibold">
+              {name ? `${name}${age ? `, ${age}` : ''}` : `Match ${id.substring(0, 8)}`}
+            </h3>
+            {isOnline && (
+              <Badge variant="secondary" className="ml-2 bg-green-500 text-white text-xs flex items-center">
+                <Circle className="h-1.5 w-1.5 mr-1 fill-current" />
+                Online
+              </Badge>
+            )}
+          </div>
           <div className="flex flex-wrap gap-2 mt-1">
             <Badge variant="outline" className="text-xs">
               {gender}
@@ -76,7 +86,6 @@ const MatchListItem: React.FC<MatchListItemProps> = ({
           </div>
         </div>
       </div>
-
       <div className="flex-grow text-center sm:text-left">
         <div className="grid grid-cols-2 gap-2 text-sm mt-2">
           <p><span className="text-muted-foreground">Body:</span> {bodyType}</p>
@@ -92,13 +101,14 @@ const MatchListItem: React.FC<MatchListItemProps> = ({
           <span className="text-muted-foreground">{locationRadius}</span>
         </div>
       </div>
-
       <div className="flex flex-col items-center sm:items-end space-y-2">
-        {isVerified && (
-          <Badge variant="secondary" className="bg-green-500 text-white">
-            Verified
-          </Badge>
-        )}
+        <div className="flex items-center space-x-2">
+          {isVerified && (
+            <Badge variant="secondary" className="bg-green-500 text-white">
+              Verified
+            </Badge>
+          )}
+        </div>
         <Button onClick={handleChat} className="w-full sm:w-auto">
           <MessageSquare className="h-4 w-4 mr-2" />
           Chat

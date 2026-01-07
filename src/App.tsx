@@ -10,12 +10,16 @@ import Header from "./components/Header";
 import ChatPage from "./pages/ChatPage";
 import Login from "./pages/Login";
 import { SessionContextProvider } from "./components/SessionContextProvider";
+import ProfileSetup from "./pages/ProfileSetup";
+import AIVerificationPage from "./pages/AIVerificationPage";
 
 const queryClient = new QueryClient();
 
 const AppContent = () => {
   const location = useLocation();
-  const showHeader = location.pathname !== "/login"; // Determine if header should be shown
+  const showHeader = location.pathname !== "/login" && 
+                    location.pathname !== "/profile-setup" && 
+                    location.pathname !== "/ai-verification";
 
   return (
     <SessionContextProvider>
@@ -28,6 +32,8 @@ const AppContent = () => {
             <Route path="/matches" element={<MatchesPage />} />
             <Route path="/chat/:chatId" element={<ChatPage />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/profile-setup" element={<ProfileSetup />} />
+            <Route path="/ai-verification" element={<AIVerificationPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

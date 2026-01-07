@@ -32,6 +32,7 @@ interface Match {
   locationRadius: string;
   isVerified: boolean;
   isApprovedForVisibility: boolean; // This is now required
+  isOnline?: boolean; // New field for online status
 }
 
 type UserProfile = {
@@ -51,11 +52,11 @@ type UserProfile = {
   isVerified: boolean;
   latitude?: number;
   longitude?: number;
-  isApprovedForVisibility: boolean; // Make this required to match Match type
+  isApprovedForVisibility: boolean;
 };
 
 const Index = () => {
-  const { user, loading: sessionLoading } = useSession();
+  const { user, loading: sessionLoading, profileCompleted, aiVerified } = useSession();
   const navigate = useNavigate();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [potentialMatches, setPotentialMatches] = useState<Match[]>([]);
@@ -95,7 +96,7 @@ const Index = () => {
           isVerified: data.is_verified || false,
           latitude: data.latitude || undefined,
           longitude: data.longitude || undefined,
-          isApprovedForVisibility: false, // Default value for user's own profile
+          isApprovedForVisibility: false,
         });
       } else {
         // Initialize with default values if no profile exists
@@ -114,7 +115,7 @@ const Index = () => {
           comfortLevel: "chat only",
           locationRadius: "",
           isVerified: false,
-          isApprovedForVisibility: false, // Default value for user's own profile
+          isApprovedForVisibility: false,
         });
       }
       setProfileLoading(false);
@@ -186,6 +187,7 @@ const Index = () => {
           locationRadius: profile.location_radius || "N/A",
           isVerified: profile.is_verified || false,
           isApprovedForVisibility: false, // Default to false for discovery profiles
+          isOnline: true, // For demo purposes, all matches are shown as online
         }));
 
       setPotentialMatches(filteredMatches);
@@ -194,8 +196,19 @@ const Index = () => {
   };
 
   useEffect(() => {
+    // Redirect if profile not completed or not verified
+    if (user && !profileCompleted) {
+      navigate("/profile-setup");
+      return;
+    }
+    
+    if (user && profileCompleted && !aiVerified) {
+      navigate("/ai-verification");
+      return;
+    }
+    
     fetchUserProfile();
-  }, [user]);
+  }, [user, profileCompleted, aiVerified, navigate]);
 
   useEffect(() => {
     if (userProfile && user) {
@@ -278,6 +291,15 @@ const Index = () => {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <p className="text-lg text-foreground">Loading your experience...</p>
+      </div>
+    );
+  }
+
+  // Redirect if profile not completed or not verified
+  if (user && (!profileCompleted || !aiVerified)) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <p className="text-lg text-foreground">Redirecting...</p>
       </div>
     );
   }

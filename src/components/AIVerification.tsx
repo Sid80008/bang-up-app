@@ -8,9 +8,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/components/SessionContextProvider";
 import { Camera, UserCheck, Sparkles } from "lucide-react";
 import { v4 as uuidv4 } from 'uuid';
+import { useNavigate } from "react-router-dom";
 
 const AIVerification: React.FC = () => {
   const { user } = useSession();
+  const navigate = useNavigate();
   const [facePhoto, setFacePhoto] = useState<File | null>(null);
   const [bodyPhoto, setBodyPhoto] = useState<File | null>(null);
   const [facePreview, setFacePreview] = useState<string | null>(null);
@@ -21,7 +23,6 @@ const AIVerification: React.FC = () => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setFacePhoto(file);
-      
       // Create preview
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -35,7 +36,6 @@ const AIVerification: React.FC = () => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setBodyPhoto(file);
-      
       // Create preview
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -49,10 +49,8 @@ const AIVerification: React.FC = () => {
     if (!user) {
       throw new Error("User not authenticated");
     }
-
     const fileExtension = file.name.split('.').pop();
     const filePath = `${user.id}/verification/${type}_${uuidv4()}.${fileExtension}`;
-
     const { data, error } = await supabase.storage
       .from('verification-photos')
       .upload(filePath, file, {
@@ -63,7 +61,6 @@ const AIVerification: React.FC = () => {
     if (error) {
       throw error;
     }
-
     return filePath;
   };
 
@@ -79,14 +76,13 @@ const AIVerification: React.FC = () => {
     }
 
     setIsVerifying(true);
-
     try {
       // Upload face photo
       const facePath = await uploadPhoto(facePhoto, 'face');
       
       // Upload body photo
       const bodyPath = await uploadPhoto(bodyPhoto, 'body');
-
+      
       // Update profile with photo paths
       const { error: profileError } = await supabase
         .from("profiles")
@@ -108,6 +104,11 @@ const AIVerification: React.FC = () => {
       setBodyPhoto(null);
       setFacePreview(null);
       setBodyPreview(null);
+      
+      // Redirect to home after successful verification
+      setTimeout(() => {
+        navigate("/");
+      }, 2000);
     } catch (error) {
       console.error("[AIVerification] Error uploading photos:", error);
       toast.error("Failed to upload photos. Please try again.");
@@ -131,26 +132,22 @@ const AIVerification: React.FC = () => {
             Upload clear photos of your face and body for AI verification to confirm your profile accuracy.
           </p>
         </div>
-
+        
         {/* Face Photo Upload */}
         <div className="space-y-2">
           <label className="text-sm font-medium">Face Photo</label>
           <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-6">
             {facePreview ? (
-              <img 
-                src={facePreview} 
-                alt="Face preview" 
-                className="w-32 h-32 object-cover rounded-lg mb-2"
-              />
+              <img src={facePreview} alt="Face preview" className="w-32 h-32 object-cover rounded-lg mb-2" />
             ) : (
               <Camera className="h-12 w-12 text-muted-foreground mb-2" />
             )}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFacePhotoChange}
-              className="hidden"
-              id="face-photo"
+            <input 
+              type="file" 
+              accept="image/*" 
+              onChange={handleFacePhotoChange} 
+              className="hidden" 
+              id="face-photo" 
             />
             <label htmlFor="face-photo">
               <Button asChild variant="outline">
@@ -162,26 +159,22 @@ const AIVerification: React.FC = () => {
             </p>
           </div>
         </div>
-
+        
         {/* Body Photo Upload */}
         <div className="space-y-2">
           <label className="text-sm font-medium">Body Photo</label>
           <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-6">
             {bodyPreview ? (
-              <img 
-                src={bodyPreview} 
-                alt="Body preview" 
-                className="w-32 h-32 object-cover rounded-lg mb-2"
-              />
+              <img src={bodyPreview} alt="Body preview" className="w-32 h-32 object-cover rounded-lg mb-2" />
             ) : (
               <Camera className="h-12 w-12 text-muted-foreground mb-2" />
             )}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleBodyPhotoChange}
-              className="hidden"
-              id="body-photo"
+            <input 
+              type="file" 
+              accept="image/*" 
+              onChange={handleBodyPhotoChange} 
+              className="hidden" 
+              id="body-photo" 
             />
             <label htmlFor="body-photo">
               <Button asChild variant="outline">
@@ -193,7 +186,7 @@ const AIVerification: React.FC = () => {
             </p>
           </div>
         </div>
-
+        
         <Button 
           onClick={handleVerification} 
           disabled={isVerifying || !facePhoto || !bodyPhoto}
@@ -211,7 +204,7 @@ const AIVerification: React.FC = () => {
             </>
           )}
         </Button>
-
+        
         <div className="text-xs text-muted-foreground text-center">
           <p>
             Your photos will be used solely for AI verification and will not be visible to other users.

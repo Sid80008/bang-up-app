@@ -27,6 +27,7 @@ interface Match {
   isVerified: boolean;
   chatId: string;
   isApprovedForVisibility: boolean;
+  isOnline?: boolean; // New field for online status
 }
 
 const MatchesPage = () => {
@@ -49,10 +50,7 @@ const MatchesPage = () => {
       // Fetch chats where the current user is involved
       const { data: chats, error: chatsError } = await supabase
         .from("chats")
-        .select(`*, 
-          user1:user1_id(id, name, age, bio, body_count, body_type, face_type, gender, sexual_orientation, comfort_level, location_radius, is_verified),
-          user2:user2_id(id, name, age, bio, body_count, body_type, face_type, gender, sexual_orientation, comfort_level, location_radius, is_verified)
-        `)
+        .select(`*, user1:user1_id(id, name, age, bio, body_count, body_type, face_type, gender, sexual_orientation, comfort_level, location_radius, is_verified), user2:user2_id(id, name, age, bio, body_count, body_type, face_type, gender, sexual_orientation, comfort_level, location_radius, is_verified) `)
         .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`);
 
       if (chatsError) {
@@ -68,6 +66,8 @@ const MatchesPage = () => {
       for (const chat of chats || []) {
         const otherUser = chat.user1.id === user.id ? chat.user2 : chat.user1;
         if (otherUser) {
+          // For now, we'll set all matches as online
+          // In a real app, you would check actual online status
           processedMatches.push({
             id: otherUser.id,
             name: otherUser.name || "Anonymous",
@@ -84,6 +84,7 @@ const MatchesPage = () => {
             isVerified: otherUser.is_verified || false,
             chatId: chat.id,
             isApprovedForVisibility: chat.visibility_approved,
+            isOnline: true, // For demo purposes, all matches are shown as online
           });
         }
       }
@@ -147,14 +148,14 @@ const MatchesPage = () => {
           </Link>
         </Button>
       </div>
-
+      
       <div className="text-center mb-8 w-full max-w-4xl">
         <h1 className="text-3xl md:text-4xl font-bold mb-2 text-foreground">Your Matches</h1>
         <p className="text-lg text-foreground/80">
           Connect with people who share your interests and boundaries
         </p>
       </div>
-
+      
       <Card className="w-full max-w-4xl bg-card/80 backdrop-blur-sm border-0 shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center">
@@ -166,10 +167,10 @@ const MatchesPage = () => {
           <div className="space-y-4 p-4">
             {confirmedMatches.length > 0 ? (
               confirmedMatches.map((match) => (
-                <MatchListItem
-                  key={match.chatId}
-                  {...match}
-                  onChatClick={() => handleChatClick(match.chatId)}
+                <MatchListItem 
+                  key={match.chatId} 
+                  {...match} 
+                  onChatClick={() => handleChatClick(match.chatId)} 
                 />
               ))
             ) : (
@@ -187,7 +188,7 @@ const MatchesPage = () => {
           </div>
         </CardContent>
       </Card>
-
+      
       <div className="mt-8">
         <MadeWithDyad />
       </div>

@@ -3,7 +3,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Heart, MessageSquare, HeartHandshake, User, Sparkles } from "lucide-react";
+import { MapPin, Heart, MessageSquare, HeartHandshake, User, Sparkles, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface DiscoveryProfileCardProps {
@@ -25,6 +25,7 @@ interface DiscoveryProfileCardProps {
   isApprovedForVisibility: boolean;
   onLike?: (id: string) => void;
   onPass?: (id: string) => void;
+  isOnline?: boolean; // New prop for online status
 }
 
 const DiscoveryProfileCard: React.FC<DiscoveryProfileCardProps> = ({
@@ -46,6 +47,7 @@ const DiscoveryProfileCard: React.FC<DiscoveryProfileCardProps> = ({
   isApprovedForVisibility,
   onLike,
   onPass,
+  isOnline = false, // Default to false
 }) => {
   const getComfortLevelIcon = (level: string) => {
     switch (level) {
@@ -67,11 +69,19 @@ const DiscoveryProfileCard: React.FC<DiscoveryProfileCardProps> = ({
           <Sparkles className="h-5 w-5 mr-2" />
           <CardTitle className="text-xl font-bold">Discovery Profile</CardTitle>
         </div>
-        {isVerified && (
-          <Badge variant="secondary" className="bg-green-500 text-white">
-            Verified
-          </Badge>
-        )}
+        <div className="flex items-center space-x-2">
+          {isOnline && (
+            <Badge variant="secondary" className="bg-green-500 text-white flex items-center">
+              <Circle className="h-2 w-2 mr-1 fill-current" />
+              Online
+            </Badge>
+          )}
+          {isVerified && (
+            <Badge variant="secondary" className="bg-green-500 text-white">
+              Verified
+            </Badge>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="p-6 space-y-4">
         {isApprovedForVisibility ? (
@@ -89,14 +99,12 @@ const DiscoveryProfileCard: React.FC<DiscoveryProfileCardProps> = ({
             <p className="text-muted-foreground italic">Full profile hidden until match</p>
           </div>
         )}
-
         {isApprovedForVisibility && bodyCount !== undefined && (
           <div>
             <p className="text-sm text-muted-foreground">Body Count</p>
             <p className="font-medium">{bodyCount}</p>
           </div>
         )}
-
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-sm text-muted-foreground">Body Type</p>
@@ -115,12 +123,10 @@ const DiscoveryProfileCard: React.FC<DiscoveryProfileCardProps> = ({
             <p className="font-medium">{sexualOrientation}</p>
           </div>
         </div>
-
         <div>
           <p className="text-sm text-muted-foreground">Desired Partner (Physical)</p>
           <p className="font-medium">{desiredPartnerPhysical}</p>
         </div>
-
         <div>
           <p className="text-sm text-muted-foreground">Sexual Interests & Boundaries</p>
           <div className="flex flex-wrap gap-2 mt-1">
@@ -131,7 +137,6 @@ const DiscoveryProfileCard: React.FC<DiscoveryProfileCardProps> = ({
             ))}
           </div>
         </div>
-
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <p className="text-sm text-muted-foreground mr-2">Comfort Level:</p>
@@ -145,7 +150,6 @@ const DiscoveryProfileCard: React.FC<DiscoveryProfileCardProps> = ({
             <span className="text-sm">{locationRadius}</span>
           </div>
         </div>
-
         <div className="flex justify-around mt-6">
           <Button 
             variant="outline" 
@@ -154,7 +158,10 @@ const DiscoveryProfileCard: React.FC<DiscoveryProfileCardProps> = ({
           >
             Pass
           </Button>
-          <Button onClick={() => onLike?.(id)} className="bg-primary hover:bg-primary/90">
+          <Button 
+            onClick={() => onLike?.(id)} 
+            className="bg-primary hover:bg-primary/90"
+          >
             Like
           </Button>
         </div>
