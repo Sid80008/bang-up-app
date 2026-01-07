@@ -3,11 +3,14 @@
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import AnonymousProfileCard from "@/components/AnonymousProfileCard";
 import MatchProfileCard from "@/components/MatchProfileCard";
-import { toast } from "sonner"; // Import toast for feedback
+import AnonymousProfileForm from "@/components/AnonymousProfileForm";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { toast } from "sonner";
+import React, { useState } from "react";
 
 const Index = () => {
-  // Placeholder data for demonstration
-  const userProfile = {
+  const [userProfile, setUserProfile] = useState({
     bodyType: "Athletic",
     faceType: "Oval",
     gender: "Female",
@@ -17,7 +20,7 @@ const Index = () => {
     comfortLevel: "sex" as "chat only" | "make-out" | "sex",
     locationRadius: "5 km",
     isVerified: true,
-  };
+  });
 
   const potentialMatches = [
     {
@@ -70,6 +73,11 @@ const Index = () => {
     // In a real app, this would send a request to the backend
   };
 
+  const handleProfileUpdate = (data: typeof userProfile) => {
+    setUserProfile(prev => ({ ...prev, ...data }));
+    // Close the dialog after successful submission if needed
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 p-4 space-y-8">
       <div className="text-center">
@@ -79,6 +87,18 @@ const Index = () => {
         </p>
       </div>
       <AnonymousProfileCard {...userProfile} />
+
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button className="mt-4">Edit Your Anonymous Profile</Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Profile</DialogTitle>
+          </DialogHeader>
+          <AnonymousProfileForm initialData={userProfile} onSubmitSuccess={handleProfileUpdate} />
+        </DialogContent>
+      </Dialog>
 
       <div className="text-center mt-12 mb-4">
         <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Potential Matches</h2>
