@@ -1,14 +1,8 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import DiscoveryProfileCard from "./DiscoveryProfileCard"; // Renamed import
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import DiscoveryProfileCard from "./DiscoveryProfileCard";
 import { toast } from "sonner";
 
 interface Match {
@@ -27,16 +21,16 @@ interface Match {
   comfortLevel: "chat only" | "make-out" | "sex";
   locationRadius: string;
   isVerified: boolean;
-  isApprovedForVisibility: boolean; // New field
+  isApprovedForVisibility: boolean; // This is now required
 }
 
-interface DiscoverySwipeCarouselProps { // Renamed interface
+interface DiscoverySwipeCarouselProps {
   matches: Match[];
   onLike: (id: string) => void;
   onPass: (id: string) => void;
 }
 
-const DiscoverySwipeCarousel: React.FC<DiscoverySwipeCarouselProps> = ({ // Renamed component
+const DiscoverySwipeCarousel: React.FC<DiscoverySwipeCarouselProps> = ({
   matches: initialMatches,
   onLike,
   onPass,
@@ -55,6 +49,7 @@ const DiscoverySwipeCarousel: React.FC<DiscoverySwipeCarouselProps> = ({ // Rena
     } else {
       onPass(id);
     }
+
     // Remove the swiped match from the current list
     setCurrentMatches((prevMatches) => prevMatches.filter((match) => match.id !== id));
 
@@ -81,11 +76,11 @@ const DiscoverySwipeCarousel: React.FC<DiscoverySwipeCarouselProps> = ({ // Rena
       <CarouselContent>
         {currentMatches.map((match) => (
           <CarouselItem key={match.id} className="flex justify-center">
-            <DiscoveryProfileCard // Renamed component
+            <DiscoveryProfileCard
               {...match}
               onLike={() => handleAction(match.id, 'like')}
               onPass={() => handleAction(match.id, 'pass')}
-              isApprovedForVisibility={match.isApprovedForVisibility} // Pass the new prop
+              isApprovedForVisibility={match.isApprovedForVisibility}
             />
           </CarouselItem>
         ))}

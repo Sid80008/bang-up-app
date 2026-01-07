@@ -15,13 +15,31 @@ import { supabase } from "@/integrations/supabase/client";
 import { Heart, Sparkles, UserCircle, Users, Camera } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+// Define the Match type to match what DiscoverySwipeCarousel expects
+interface Match {
+  id: string;
+  name?: string;
+  age?: number;
+  bio?: string;
+  bodyCount?: number;
+  bodyType: string;
+  faceType: string;
+  gender: string;
+  sexualOrientation: string;
+  desiredPartnerPhysical: string;
+  sexualInterests: string[];
+  comfortLevel: "chat only" | "make-out" | "sex";
+  locationRadius: string;
+  isVerified: boolean;
+  isApprovedForVisibility: boolean; // This is now required
+}
+
 type UserProfile = {
   id: string;
   name: string;
   age: number;
   bio?: string;
   bodyCount?: number;
-  // Removed photo_url
   bodyType: string;
   faceType: string;
   gender: string;
@@ -33,14 +51,14 @@ type UserProfile = {
   isVerified: boolean;
   latitude?: number;
   longitude?: number;
-  isApprovedForVisibility: boolean; // Make this required to match Match type
+  isApprovedForVisibility?: boolean;
 };
 
 const Index = () => {
   const { user, loading: sessionLoading } = useSession();
   const navigate = useNavigate();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [potentialMatches, setPotentialMatches] = useState<UserProfile[]>([]);
+  const [potentialMatches, setPotentialMatches] = useState<Match[]>([]);
   const [profileLoading, setProfileLoading] = useState(true);
   const [matchesLoading, setMatchesLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -66,7 +84,6 @@ const Index = () => {
           age: data.age || 0,
           bio: data.bio || "",
           bodyCount: data.body_count || 0,
-          // Removed photo_url
           bodyType: data.body_type || "",
           faceType: data.face_type || "",
           gender: data.gender || "",
@@ -78,7 +95,7 @@ const Index = () => {
           isVerified: data.is_verified || false,
           latitude: data.latitude || undefined,
           longitude: data.longitude || undefined,
-          isApprovedForVisibility: false, // Default value for discovery profiles
+          isApprovedForVisibility: false,
         });
       } else {
         // Initialize with default values if no profile exists
@@ -88,7 +105,6 @@ const Index = () => {
           age: 0,
           bio: "",
           bodyCount: 0,
-          // Removed photo_url
           bodyType: "",
           faceType: "",
           gender: "",
@@ -98,7 +114,7 @@ const Index = () => {
           comfortLevel: "chat only",
           locationRadius: "",
           isVerified: false,
-          isApprovedForVisibility: false, // Default value for discovery profiles
+          isApprovedForVisibility: false,
         });
       }
       setProfileLoading(false);
@@ -139,13 +155,12 @@ const Index = () => {
       .neq("id", user.id)
       .not("id", "in", `(${interactedUserIds.join(',')})`);
 
-    // Exclude interacted users
     if (profilesError) {
       console.error("[IndexPage] Error fetching potential matches:", profilesError);
       toast.error("Failed to load potential matches.");
       setPotentialMatches([]);
     } else {
-      const filteredMatches: UserProfile[] = (profiles || [])
+      const filteredMatches: Match[] = (profiles || [])
         .filter(profile => {
           // Basic interest matching: at least one shared sexual interest
           if (!profile.sexual_interests || profile.sexual_interests.length === 0) {
@@ -161,7 +176,6 @@ const Index = () => {
           age: profile.age || 0,
           bio: profile.bio || "",
           bodyCount: profile.body_count || 0,
-          // Removed photo_url
           bodyType: profile.body_type || "N/A",
           faceType: profile.face_type || "N/A",
           gender: profile.gender || "N/A",
@@ -171,8 +185,6 @@ const Index = () => {
           comfortLevel: (profile.comfort_level as "chat only" | "make-out" | "sex") || "chat only",
           locationRadius: profile.location_radius || "N/A",
           isVerified: profile.is_verified || false,
-          latitude: profile.latitude || undefined,
-          longitude: profile.longitude || undefined,
           isApprovedForVisibility: false, // Default to false for discovery profiles
         }));
 
