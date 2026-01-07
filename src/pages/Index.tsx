@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import React, { useState } from "react";
+import { Link } from "react-router-dom"; // Import Link for navigation
 
 const Index = () => {
   const [userProfile, setUserProfile] = useState({
@@ -88,17 +89,22 @@ const Index = () => {
       </div>
       <AnonymousProfileCard {...userProfile} />
 
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button className="mt-4">Edit Your Anonymous Profile</Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Profile</DialogTitle>
-          </DialogHeader>
-          <AnonymousProfileForm initialData={userProfile} onSubmitSuccess={handleProfileUpdate} />
-        </DialogContent>
-      </Dialog>
+      <div className="flex space-x-4 mt-4">
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button>Edit Your Anonymous Profile</Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Edit Profile</DialogTitle>
+            </DialogHeader>
+            <AnonymousProfileForm initialData={userProfile} onSubmitSuccess={handleProfileUpdate} />
+          </DialogContent>
+        </Dialog>
+        <Button asChild>
+          <Link to="/matches">View Your Matches</Link>
+        </Button>
+      </div>
 
       <div className="text-center mt-12 mb-4">
         <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Potential Matches</h2>
