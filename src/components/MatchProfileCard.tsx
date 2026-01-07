@@ -3,7 +3,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Heart, MessageSquare, Kiss } from "lucide-react";
+import { MapPin, Heart, MessageSquare, HeartHandshake } from "lucide-react"; // Changed Kiss to HeartHandshake
 import { Button } from "@/components/ui/button"; // Assuming a Button component exists
 
 interface MatchProfileCardProps {
@@ -40,7 +40,7 @@ const MatchProfileCard: React.FC<MatchProfileCardProps> = ({
       case "chat only":
         return <MessageSquare className="h-4 w-4 mr-1" />;
       case "make-out":
-        return <Kiss className="h-4 w-4 mr-1" />;
+        return <HeartHandshake className="h-4 w-4 mr-1" />; // Using HeartHandshake
       case "sex":
         return <Heart className="h-4 w-4 mr-1" />;
       default:

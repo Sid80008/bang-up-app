@@ -3,7 +3,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Heart, MessageSquare, Kiss, Handshake } from "lucide-react";
+import { MapPin, Heart, MessageSquare, HeartHandshake } from "lucide-react"; // Changed Kiss to HeartHandshake
 
 // Changed from interface to type
 type AnonymousProfileCardProps = {
@@ -34,7 +34,7 @@ const AnonymousProfileCard: React.FC<AnonymousProfileCardProps> = ({
       case "chat only":
         return <MessageSquare className="h-4 w-4 mr-1" />;
       case "make-out":
-        return <Kiss className="h-4 w-4 mr-1" />;
+        return <HeartHandshake className="h-4 w-4 mr-1" />; // Using HeartHandshake
       case "sex":
         return <Heart className="h-4 w-4 mr-1" />;
       default:
