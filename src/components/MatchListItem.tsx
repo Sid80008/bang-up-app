@@ -4,7 +4,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, MessageSquare, Heart, HeartHandshake } from "lucide-react"; // Ensured only valid icons are imported
+import { MapPin, MessageSquare, Heart, HeartHandshake } from "lucide-react";
 import { toast } from "sonner";
 
 interface MatchListItemProps {
@@ -16,7 +16,8 @@ interface MatchListItemProps {
   comfortLevel: "chat only" | "make-out" | "sex";
   locationRadius: string;
   isVerified: boolean;
-  onChatClick?: (id: string) => void;
+  chatId: string; // Added chatId prop
+  onChatClick?: (chatId: string) => void; // Changed to accept chatId
 }
 
 const MatchListItem: React.FC<MatchListItemProps> = ({
@@ -28,6 +29,7 @@ const MatchListItem: React.FC<MatchListItemProps> = ({
   comfortLevel,
   locationRadius,
   isVerified,
+  chatId, // Destructure chatId
   onChatClick,
 }) => {
   const getComfortLevelIcon = (level: string) => {
@@ -35,7 +37,7 @@ const MatchListItem: React.FC<MatchListItemProps> = ({
       case "chat only":
         return <MessageSquare className="h-4 w-4 mr-1" />;
       case "make-out":
-        return <HeartHandshake className="h-4 w-4 mr-1" />; // Using HeartHandshake
+        return <HeartHandshake className="h-4 w-4 mr-1" />;
       case "sex":
         return <Heart className="h-4 w-4 mr-1" />;
       default:
@@ -45,7 +47,7 @@ const MatchListItem: React.FC<MatchListItemProps> = ({
 
   const handleChat = () => {
     toast.info(`Initiating chat with match ${id}...`);
-    onChatClick?.(id);
+    onChatClick?.(chatId); // Pass chatId to onChatClick
   };
 
   return (

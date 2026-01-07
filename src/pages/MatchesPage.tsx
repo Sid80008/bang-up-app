@@ -3,12 +3,14 @@
 import React from "react";
 import MatchListItem from "@/components/MatchListItem";
 import { MadeWithDyad } from "@/components/made-with-dyad";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // Import useNavigate
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 const MatchesPage = () => {
+  const navigate = useNavigate(); // Initialize useNavigate
+
   // Placeholder data for confirmed matches
   const confirmedMatches = [
     {
@@ -20,6 +22,7 @@ const MatchesPage = () => {
       comfortLevel: "sex" as "chat only" | "make-out" | "sex",
       locationRadius: "3 km",
       isVerified: true,
+      chatId: "chat123", // Example chat ID
     },
     {
       id: "matchB",
@@ -30,6 +33,7 @@ const MatchesPage = () => {
       comfortLevel: "make-out" as "chat only" | "make-out" | "sex",
       locationRadius: "8 km",
       isVerified: false,
+      chatId: "chat456", // Example chat ID
     },
     {
       id: "matchC",
@@ -40,12 +44,13 @@ const MatchesPage = () => {
       comfortLevel: "chat only" as "chat only" | "make-out" | "sex",
       locationRadius: "1 km",
       isVerified: true,
+      chatId: "chat789", // Example chat ID
     },
   ];
 
-  const handleChatClick = (matchId: string) => {
-    toast.success(`Opening chat with ${matchId}!`);
-    // In a real app, this would navigate to a chat screen
+  const handleChatClick = (chatId: string) => {
+    toast.success(`Opening chat with ${chatId}!`);
+    navigate(`/chat/${chatId}`); // Navigate to the new chat page
   };
 
   return (
@@ -67,7 +72,7 @@ const MatchesPage = () => {
       <div className="w-full max-w-4xl bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 space-y-4">
         {confirmedMatches.length > 0 ? (
           confirmedMatches.map((match) => (
-            <MatchListItem key={match.id} {...match} onChatClick={handleChatClick} />
+            <MatchListItem key={match.id} {...match} onChatClick={() => handleChatClick(match.chatId)} />
           ))
         ) : (
           <p className="text-center text-gray-500 dark:text-gray-400">No matches yet. Keep swiping!</p>

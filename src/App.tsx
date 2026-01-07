@@ -6,7 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import MatchesPage from "./pages/MatchesPage";
-import Header from "./components/Header"; // Import the new Header component
+import Header from "./components/Header";
+import ChatPage from "./pages/ChatPage"; // Import the new ChatPage component
 
 const queryClient = new QueryClient();
 
@@ -16,12 +17,13 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <div className="flex flex-col min-h-screen"> {/* Added a flex container for layout */}
-          <Header /> {/* Render the Header component */}
-          <main className="flex-grow"> {/* Main content area */}
+        <div className="flex flex-col min-h-screen">
+          <Header />
+          <main className="flex-grow">
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/matches" element={<MatchesPage />} />
+              <Route path="/chat/:chatId" element={<ChatPage />} /> {/* New route for ChatPage */}
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
