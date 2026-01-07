@@ -63,6 +63,7 @@ interface ProfileFormProps {
     isVerified?: boolean;
     latitude?: number;
     longitude?: number;
+    body_count?: number; // Add this to match database field
   };
   onSubmitSuccess?: (data: z.infer<typeof formSchema> & {
     id: string;
@@ -83,7 +84,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, onSubmitSuccess 
       name: initialData?.name || "",
       age: initialData?.age || 18,
       bio: initialData?.bio || "",
-      bodyCount: initialData?.body_count || 0,
+      bodyCount: initialData?.bodyCount || initialData?.body_count || 0,
       bodyType: initialData?.bodyType || "",
       faceType: initialData?.faceType || "",
       gender: initialData?.gender || "",
@@ -99,7 +100,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, onSubmitSuccess 
     if (initialData) {
       form.reset({
         ...initialData,
-        bodyCount: initialData.body_count,
+        bodyCount: initialData.bodyCount || initialData.body_count || 0,
       });
       setLatitude(initialData.latitude || null);
       setLongitude(initialData.longitude || null);

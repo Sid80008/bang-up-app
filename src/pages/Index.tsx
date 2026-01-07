@@ -33,7 +33,7 @@ type UserProfile = {
   isVerified: boolean;
   latitude?: number;
   longitude?: number;
-  isApprovedForVisibility?: boolean;
+  isApprovedForVisibility?: boolean; // Make this optional to match Match type
 };
 
 const Index = () => {
@@ -78,6 +78,7 @@ const Index = () => {
           isVerified: data.is_verified || false,
           latitude: data.latitude || undefined,
           longitude: data.longitude || undefined,
+          isApprovedForVisibility: false, // Default value for discovery profiles
         });
       } else {
         // Initialize with default values if no profile exists
@@ -97,6 +98,7 @@ const Index = () => {
           comfortLevel: "chat only",
           locationRadius: "",
           isVerified: false,
+          isApprovedForVisibility: false, // Default value for discovery profiles
         });
       }
       setProfileLoading(false);
