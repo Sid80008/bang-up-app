@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "vercel-build": "pnpm build"
+    "deploy": "gh-pages -d dist"
   },
   "engines": {
     "node": ">=18.0.0"
