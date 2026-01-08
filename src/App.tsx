@@ -44,9 +44,7 @@ function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetError
 
 const AppContent = () => {
   const location = useLocation();
-  const showHeader = location.pathname !== "/login" && 
-                    location.pathname !== "/profile-setup" && 
-                    location.pathname !== "/ai-verification";
+  const showHeader = location.pathname !== "/login" && location.pathname !== "/profile-setup" && location.pathname !== "/ai-verification";
 
   // Simple page view tracking
   useEffect(() => {
