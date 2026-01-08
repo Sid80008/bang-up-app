@@ -1,5 +1,4 @@
 "use client";
-
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import MyPreferencesCard from "@/components/MyPreferencesCard";
 import DiscoverySwipeCarousel from "@/components/DiscoverySwipeCarousel";
@@ -22,6 +21,7 @@ interface Match {
   age?: number;
   bio?: string;
   bodyCount?: number;
+  height?: number; // Added height field
   bodyType: string;
   faceType: string;
   gender: string;
@@ -41,6 +41,7 @@ type UserProfile = {
   age: number;
   bio?: string;
   bodyCount?: number;
+  height?: number; // Added height field
   bodyType: string;
   faceType: string;
   gender: string;
@@ -85,6 +86,7 @@ const Index = () => {
           age: data.age || 0,
           bio: data.bio || "",
           bodyCount: data.body_count || 0,
+          height: data.height || 0, // Added height field
           bodyType: data.body_type || "",
           faceType: data.face_type || "",
           gender: data.gender || "",
@@ -106,6 +108,7 @@ const Index = () => {
           age: 0,
           bio: "",
           bodyCount: 0,
+          height: 0, // Added height field
           bodyType: "",
           faceType: "",
           gender: "",
@@ -177,6 +180,7 @@ const Index = () => {
           age: profile.age || 0,
           bio: profile.bio || "",
           bodyCount: profile.body_count || 0,
+          height: profile.height || 0, // Added height field
           bodyType: profile.body_type || "N/A",
           faceType: profile.face_type || "N/A",
           gender: profile.gender || "N/A",
@@ -201,12 +205,12 @@ const Index = () => {
       navigate("/profile-setup");
       return;
     }
-    
+
     if (user && profileCompleted && !aiVerified) {
       navigate("/ai-verification");
       return;
     }
-    
+
     fetchUserProfile();
   }, [user, profileCompleted, aiVerified, navigate]);
 
@@ -308,7 +312,7 @@ const Index = () => {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background to-secondary p-4 space-y-6">
         <div className="text-center max-w-2xl">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">Welcome to Consent-First Sex</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">Welcome to Choice Matters</h1>
           <p className="text-xl mb-8 text-foreground/80">
             A safe space for meaningful connections based on mutual respect and clear boundaries.
           </p>
@@ -361,16 +365,14 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col items-center bg-gradient-to-b from-background to-secondary p-4 space-y-8">
       <div className="text-center w-full max-w-4xl">
-        <h1 className="text-3xl md:text-4xl font-bold mb-2 text-foreground">Your Consent-First Experience</h1>
+        <h1 className="text-3xl md:text-4xl font-bold mb-2 text-foreground">Your Choice Matters Experience</h1>
         <p className="text-lg mb-6 text-foreground/80">
           Manage your preferences and discover compatible connections
         </p>
       </div>
-
       <div className="w-full max-w-4xl">
         {userProfile && <MyPreferencesCard {...userProfile} />}
       </div>
-
       <div className="flex flex-wrap gap-4 justify-center mt-4">
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
@@ -385,7 +387,6 @@ const Index = () => {
             {userProfile && <ProfileForm initialData={userProfile} onSubmitSuccess={handleProfileUpdate} />}
           </DialogContent>
         </Dialog>
-        
         <Dialog open={isVerificationDialogOpen} onOpenChange={setIsVerificationDialogOpen}>
           <DialogTrigger asChild>
             <Button size="lg" className="px-6 py-3" variant="outline">
@@ -400,7 +401,6 @@ const Index = () => {
             <AIVerification />
           </DialogContent>
         </Dialog>
-        
         <Button asChild size="lg" className="px-6 py-3">
           <Link to="/matches">
             <Users className="h-4 w-4 mr-2" />
@@ -408,14 +408,12 @@ const Index = () => {
           </Link>
         </Button>
       </div>
-
       <div className="text-center mt-12 mb-6 w-full max-w-4xl">
         <h2 className="text-2xl md:text-3xl font-bold mb-2 text-foreground">Discovery Profiles</h2>
         <p className="text-lg text-foreground/80">
           Swipe through profiles based on your interests and boundaries
         </p>
       </div>
-
       <div className="w-full max-w-md mb-12">
         <DiscoverySwipeCarousel
           matches={potentialMatches}
@@ -423,7 +421,6 @@ const Index = () => {
           onPass={(id) => handleInteraction(id, 'pass')}
         />
       </div>
-
       <MadeWithDyad />
     </div>
   );

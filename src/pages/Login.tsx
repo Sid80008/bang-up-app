@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect } from "react";
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
@@ -16,7 +15,7 @@ const Login: React.FC = () => {
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (session) {
-          toast.success("Welcome to Consent-First Sex!");
+          toast.success("Welcome to Choice Matters!");
           navigate("/");
         }
       }
@@ -36,7 +35,7 @@ const Login: React.FC = () => {
               <Heart className="h-8 w-8 text-primary-foreground fill-current" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-foreground">Welcome to Consent-First Sex</CardTitle>
+          <CardTitle className="text-2xl font-bold text-foreground">Welcome to Choice Matters</CardTitle>
           <p className="text-foreground/70 mt-2">
             Safe, respectful connections based on clear boundaries
           </p>

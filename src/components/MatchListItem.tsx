@@ -1,5 +1,4 @@
 "use client";
-
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,9 +18,9 @@ interface MatchListItemProps {
   chatId: string;
   name?: string;
   age?: number;
-  // Removed photo_url
+  height?: number; // Added height field
   onChatClick?: (chatId: string) => void;
-  isOnline?: boolean; // New prop for online status
+  isOnline?: boolean;
 }
 
 const MatchListItem: React.FC<MatchListItemProps> = ({
@@ -36,9 +35,9 @@ const MatchListItem: React.FC<MatchListItemProps> = ({
   chatId,
   name,
   age,
-  // Removed photo_url
+  height, // Added height field
   onChatClick,
-  isOnline = false, // Default to false
+  isOnline = false,
 }) => {
   const getComfortLevelIcon = (level: string) => {
     switch (level) {
@@ -90,6 +89,9 @@ const MatchListItem: React.FC<MatchListItemProps> = ({
         <div className="grid grid-cols-2 gap-2 text-sm mt-2">
           <p><span className="text-muted-foreground">Body:</span> {bodyType}</p>
           <p><span className="text-muted-foreground">Face:</span> {faceType}</p>
+          {height !== undefined && (
+            <p><span className="text-muted-foreground">Height:</span> {height} cm</p>
+          )}
         </div>
         <div className="flex items-center justify-center sm:justify-start mt-2 text-sm">
           <p className="text-muted-foreground mr-2">Comfort:</p>

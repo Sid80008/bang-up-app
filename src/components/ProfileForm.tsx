@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,11 +32,24 @@ const sexualInterestsOptions = [
 
 // Predefined options for body types and face types
 const bodyTypeOptions = [
-  "Slim", "Athletic", "Average", "Curvy", "Muscular", "Pear-shaped", "Apple-shaped", "Hourglass"
+  "Slim",
+  "Athletic",
+  "Average",
+  "Curvy",
+  "Muscular",
+  "Pear-shaped",
+  "Apple-shaped",
+  "Hourglass"
 ];
 
 const faceTypeOptions = [
-  "Oval", "Round", "Square", "Heart-shaped", "Diamond-shaped", "Long", "Rectangular"
+  "Oval",
+  "Round",
+  "Square",
+  "Heart-shaped",
+  "Diamond-shaped",
+  "Long",
+  "Rectangular"
 ];
 
 const formSchema = z.object({
@@ -45,6 +57,7 @@ const formSchema = z.object({
   age: z.coerce.number().min(18, "You must be at least 18 years old").max(120, "Age seems too high"),
   bio: z.string().max(500, "Bio must not exceed 500 characters").optional(),
   bodyCount: z.coerce.number().min(0, "Body count cannot be negative").optional(),
+  height: z.coerce.number().min(50, "Height must be at least 50cm").max(300, "Height seems too high").optional(), // Added height field
   bodyType: z.string().min(1, "Body type is required"),
   faceType: z.string().min(1, "Face type is required"),
   gender: z.string().min(1, "Gender is required"),
@@ -64,6 +77,7 @@ interface ProfileFormProps {
     latitude?: number;
     longitude?: number;
     body_count?: number; // Add this to match database field
+    height?: number; // Add height field
   };
   onSubmitSuccess?: (data: z.infer<typeof formSchema> & {
     id: string;
@@ -85,6 +99,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, onSubmitSuccess 
       age: initialData?.age || 18,
       bio: initialData?.bio || "",
       bodyCount: initialData?.bodyCount !== undefined ? initialData?.bodyCount : (initialData?.body_count || 0),
+      height: initialData?.height || 0, // Added height field
       bodyType: initialData?.bodyType || "",
       faceType: initialData?.faceType || "",
       gender: initialData?.gender || "",
@@ -92,7 +107,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, onSubmitSuccess 
       desiredPartnerPhysical: initialData?.desiredPartnerPhysical || "",
       sexualInterests: initialData?.sexualInterests || [],
       comfortLevel: initialData?.comfortLevel || "chat only",
-      locationRadius: initialData?.locationRadius || "5 km",
+      locationRadius: initialData?.locationRadius || "5 km", // Set default unit to km
     },
   });
 
@@ -101,6 +116,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, onSubmitSuccess 
       form.reset({
         ...initialData,
         bodyCount: initialData.bodyCount !== undefined ? initialData.bodyCount : (initialData.body_count || 0),
+        height: initialData.height || 0, // Added height field
       });
       setLatitude(initialData.latitude || null);
       setLongitude(initialData.longitude || null);
@@ -137,6 +153,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, onSubmitSuccess 
       age: data.age,
       bio: data.bio,
       body_count: data.bodyCount,
+      height: data.height, // Added height field
       body_type: data.bodyType,
       face_type: data.faceType,
       gender: data.gender,
@@ -152,9 +169,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, onSubmitSuccess 
 
     const { error } = await supabase
       .from("profiles")
-      .upsert(profileData, {
-        onConflict: 'id'
-      });
+      .upsert(profileData, { onConflict: 'id' });
 
     if (error) {
       console.error("[ProfileForm] Error updating profile:", error);

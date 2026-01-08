@@ -1,5 +1,4 @@
 "use client";
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +11,7 @@ interface DiscoveryProfileCardProps {
   age?: number;
   bio?: string;
   bodyCount?: number;
-  // Removed photo_url
+  height?: number; // Added height field
   bodyType: string;
   faceType: string;
   gender: string;
@@ -25,7 +24,7 @@ interface DiscoveryProfileCardProps {
   isApprovedForVisibility: boolean;
   onLike?: (id: string) => void;
   onPass?: (id: string) => void;
-  isOnline?: boolean; // New prop for online status
+  isOnline?: boolean;
 }
 
 const DiscoveryProfileCard: React.FC<DiscoveryProfileCardProps> = ({
@@ -34,7 +33,7 @@ const DiscoveryProfileCard: React.FC<DiscoveryProfileCardProps> = ({
   age,
   bio,
   bodyCount,
-  // Removed photo_url
+  height, // Added height field
   bodyType,
   faceType,
   gender,
@@ -47,7 +46,7 @@ const DiscoveryProfileCard: React.FC<DiscoveryProfileCardProps> = ({
   isApprovedForVisibility,
   onLike,
   onPass,
-  isOnline = false, // Default to false
+  isOnline = false,
 }) => {
   const getComfortLevelIcon = (level: string) => {
     switch (level) {
@@ -99,12 +98,20 @@ const DiscoveryProfileCard: React.FC<DiscoveryProfileCardProps> = ({
             <p className="text-muted-foreground italic">Full profile hidden until match</p>
           </div>
         )}
-        {isApprovedForVisibility && bodyCount !== undefined && (
-          <div>
-            <p className="text-sm text-muted-foreground">Body Count</p>
-            <p className="font-medium">{bodyCount}</p>
-          </div>
-        )}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {isApprovedForVisibility && bodyCount !== undefined && (
+            <div>
+              <p className="text-sm text-muted-foreground">Body Count</p>
+              <p className="font-medium">{bodyCount}</p>
+            </div>
+          )}
+          {isApprovedForVisibility && height !== undefined && (
+            <div>
+              <p className="text-sm text-muted-foreground">Height</p>
+              <p className="font-medium">{height} cm</p>
+            </div>
+          )}
+        </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-sm text-muted-foreground">Body Type</p>
@@ -151,15 +158,15 @@ const DiscoveryProfileCard: React.FC<DiscoveryProfileCardProps> = ({
           </div>
         </div>
         <div className="flex justify-around mt-6">
-          <Button 
-            variant="outline" 
-            onClick={() => onPass?.(id)} 
+          <Button
+            variant="outline"
+            onClick={() => onPass?.(id)}
             className="border-destructive text-destructive hover:bg-destructive/10"
           >
             Pass
           </Button>
-          <Button 
-            onClick={() => onLike?.(id)} 
+          <Button
+            onClick={() => onLike?.(id)}
             className="bg-primary hover:bg-primary/90"
           >
             Like

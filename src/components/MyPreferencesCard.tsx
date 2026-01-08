@@ -1,5 +1,4 @@
 "use client";
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +9,7 @@ type MyPreferencesCardProps = {
   age: number;
   bio?: string;
   bodyCount?: number;
+  height?: number; // Added height field
   bodyType: string;
   faceType: string;
   gender: string;
@@ -19,7 +19,6 @@ type MyPreferencesCardProps = {
   comfortLevel: "chat only" | "make-out" | "sex";
   locationRadius: string;
   isVerified: boolean;
-  // Removed photo_url
 };
 
 const MyPreferencesCard: React.FC<MyPreferencesCardProps> = ({
@@ -27,6 +26,7 @@ const MyPreferencesCard: React.FC<MyPreferencesCardProps> = ({
   age,
   bio,
   bodyCount,
+  height, // Added height field
   bodyType,
   faceType,
   gender,
@@ -36,7 +36,6 @@ const MyPreferencesCard: React.FC<MyPreferencesCardProps> = ({
   comfortLevel,
   locationRadius,
   isVerified,
-  // Removed photo_url
 }) => {
   const getComfortLevelIcon = (level: string) => {
     switch (level) {
@@ -74,14 +73,20 @@ const MyPreferencesCard: React.FC<MyPreferencesCardProps> = ({
             {bio && <p className="text-sm text-primary-foreground/80 mt-1">{bio}</p>}
           </div>
         </div>
-
-        {bodyCount !== undefined && (
-          <div>
-            <p className="text-sm text-muted-foreground">Body Count</p>
-            <p className="font-medium">{bodyCount}</p>
-          </div>
-        )}
-
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {bodyCount !== undefined && (
+            <div>
+              <p className="text-sm text-muted-foreground">Body Count</p>
+              <p className="font-medium">{bodyCount}</p>
+            </div>
+          )}
+          {height !== undefined && (
+            <div>
+              <p className="text-sm text-muted-foreground">Height</p>
+              <p className="font-medium">{height} cm</p>
+            </div>
+          )}
+        </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-sm text-muted-foreground">Body Type</p>
@@ -100,12 +105,10 @@ const MyPreferencesCard: React.FC<MyPreferencesCardProps> = ({
             <p className="font-medium">{sexualOrientation}</p>
           </div>
         </div>
-
         <div>
           <p className="text-sm text-muted-foreground">Desired Partner (Physical)</p>
           <p className="font-medium">{desiredPartnerPhysical}</p>
         </div>
-
         <div>
           <p className="text-sm text-muted-foreground">Sexual Interests & Boundaries</p>
           <div className="flex flex-wrap gap-2 mt-1">
@@ -116,7 +119,6 @@ const MyPreferencesCard: React.FC<MyPreferencesCardProps> = ({
             ))}
           </div>
         </div>
-
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <p className="text-sm text-muted-foreground mr-2">Comfort Level:</p>

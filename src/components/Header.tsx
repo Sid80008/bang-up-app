@@ -1,5 +1,4 @@
 "use client";
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,7 @@ const Header: React.FC = () => {
       <div className="container mx-auto flex flex-col sm:flex-row items-center justify-between">
         <Link to="/" className="text-2xl font-bold mb-2 sm:mb-0 flex items-center">
           <Heart className="h-6 w-6 mr-2 fill-current" />
-          Consent-First Sex
+          Choice Matters
         </Link>
         <nav className="flex space-x-2">
           <Button variant="ghost" asChild className="text-primary-foreground hover:bg-primary-foreground/10">
