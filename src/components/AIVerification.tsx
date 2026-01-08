@@ -17,10 +17,6 @@ const AIVerification: React.FC = () => {
   const [facePreview, setFacePreview] = useState<string | null>(null);
   const [bodyPreview, setBodyPreview] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [uploadedPaths, setUploadedPaths] = useState<{ facePath: string | null; bodyPath: string | null }>({ 
-    facePath: null, 
-    bodyPath: null 
-  });
 
   const handleFacePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -68,30 +64,6 @@ const AIVerification: React.FC = () => {
     return filePath;
   };
 
-  const deleteUploadedPhotos = async () => {
-    if (!uploadedPaths.facePath && !uploadedPaths.bodyPath) return;
-    
-    const filesToDelete = [
-      uploadedPaths.facePath,
-      uploadedPaths.bodyPath
-    ].filter(Boolean) as string[];
-    
-    if (filesToDelete.length > 0) {
-      const { error } = await supabase.storage
-        .from('verification-photos')
-        .remove(filesToDelete);
-      
-      if (error) {
-        console.error("[AIVerification] Error deleting photos:", error);
-      } else {
-        console.log("[AIVerification] Photos deleted successfully after verification");
-      }
-    }
-    
-    // Clear uploaded paths
-    setUploadedPaths({ facePath: null, bodyPath: null });
-  };
-
   const handleVerification = async () => {
     if (!user) {
       toast.error("You must be logged in to verify your profile.");
@@ -112,9 +84,6 @@ const AIVerification: React.FC = () => {
       // Upload body photo
       const bodyPath = await uploadPhoto(bodyPhoto, 'body');
       
-      // Store uploaded paths for cleanup
-      setUploadedPaths({ facePath, bodyPath });
-      
       // Update profile with photo paths
       const { error: profileError } = await supabase
         .from("profiles")
@@ -131,56 +100,42 @@ const AIVerification: React.FC = () => {
       
       toast.success("Photos uploaded successfully! AI verification will be processed shortly.");
       
-      // Simulate AI verification process
-      // In a real implementation, this would be replaced with actual AI service call
-      setTimeout(async () => {
-        // After successful AI verification, delete the photos
-        await deleteUploadedPhotos();
-        
-        // Update profile to mark as verified
-        const { error: verifyError } = await supabase
-          .from("profiles")
-          .update({
-            is_verified: true,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', user.id);
-        
-        if (verifyError) {
-          console.error("[AIVerification] Error updating verification status:", verifyError);
-          toast.error("Verification completed but failed to update status.");
-        } else {
-          toast.success("AI verification completed successfully! Photos have been deleted.");
-        }
-        
+      // Trigger the edge function for AI verification
+      const { data, error } = await supabase.functions.invoke('ai-verification-cleanup', {
+        body: { profileId: user.id }
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (data.success) {
+        toast.success("AI verification completed successfully! Photos have been automatically deleted.");
         // Reset form
         setFacePhoto(null);
         setBodyPhoto(null);
         setFacePreview(null);
         setBodyPreview(null);
-        
         // Redirect to home after successful verification
         navigate("/");
-      }, 3000); // Simulate 3 second verification process
+      } else {
+        toast.error(`Verification failed: ${data.message}`);
+      }
       
     } catch (error) {
-      console.error("[AIVerification] Error uploading photos:", error);
-      toast.error("Failed to upload photos. Please try again.");
-      
-      // Clean up any uploaded photos on error
-      await deleteUploadedPhotos();
+      console.error("[AIVerification] Error during verification process:", error);
+      toast.error("Failed to process verification. Please try again.");
     } finally {
       setIsVerifying(false);
     }
   };
 
-  const handleDeletePhotos = async () => {
-    await deleteUploadedPhotos();
+  const handleDeletePhotos = () => {
     setFacePhoto(null);
     setBodyPhoto(null);
     setFacePreview(null);
     setBodyPreview(null);
-    toast.info("Photos deleted.");
+    toast.info("Photos removed.");
   };
 
   return (
@@ -196,7 +151,7 @@ const AIVerification: React.FC = () => {
         <div className="text-center">
           <p className="text-sm text-muted-foreground">
             Upload clear photos of your face and body for AI verification to confirm your profile accuracy.
-            Photos will be automatically deleted after verification.
+            Photos will be automatically deleted after successful verification.
           </p>
         </div>
         
@@ -287,6 +242,7 @@ const AIVerification: React.FC = () => {
         <div className="text-xs text-muted-foreground text-center">
           <p>
             Your photos will be used solely for AI verification and will be automatically deleted after processing.
+            If verification fails, photos will be retained for review.
           </p>
         </div>
       </CardContent>
