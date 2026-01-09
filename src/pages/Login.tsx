@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,19 +10,29 @@ import { Heart, Sparkles } from "lucide-react";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const [redirectUrl, setRedirectUrl] = useState<string>("");
+
+  useEffect(() => {
+    // Set redirect URL after component mounts (to ensure window is available)
+    setRedirectUrl(`${window.location.origin}/`);
+  }, []);
 
   useEffect(() => {
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (session) {
+          console.log("[Login] Auth state changed - user logged in");
           toast.success("Welcome to Choice Matters!");
-          navigate("/");
+          // Small delay to ensure session is fully established
+          setTimeout(() => {
+            navigate("/");
+          }, 500);
         }
       }
     );
 
     return () => {
-      authListener.subscription.unsubscribe();
+      authListener?.subscription.unsubscribe();
     };
   }, [navigate]);
 
@@ -41,23 +51,25 @@ const Login: React.FC = () => {
           </p>
         </CardHeader>
         <CardContent>
-          <Auth
-            supabaseClient={supabase}
-            providers={[]} // You can add 'google', 'github', etc. here if desired
-            appearance={{
-              theme: ThemeSupa,
-              variables: {
-                default: {
-                  colors: {
-                    brand: "hsl(var(--primary))",
-                    brandAccent: "hsl(var(--primary-foreground))",
+          {redirectUrl && (
+            <Auth
+              supabaseClient={supabase}
+              providers={[]} // You can add 'google', 'github', etc. here if desired
+              appearance={{
+                theme: ThemeSupa,
+                variables: {
+                  default: {
+                    colors: {
+                      brand: "hsl(var(--primary))",
+                      brandAccent: "hsl(var(--primary-foreground))",
+                    },
                   },
                 },
-              },
-            }}
-            theme="light" // Use "dark" if your app primarily uses dark mode
-            redirectTo={window.location.origin} // Redirects to the current origin after auth
-          />
+              }}
+              theme="light" // Use "dark" if your app primarily uses dark mode
+              redirectTo={redirectUrl}
+            />
+          )}
           <div className="mt-6 text-center text-sm text-foreground/70">
             <Sparkles className="h-4 w-4 inline mr-1" />
             By continuing, you agree to our respectful community guidelines
