@@ -67,7 +67,11 @@ const formSchema = z.object({
   comfortLevel: z.enum(["chat only", "make-out", "sex"], {
     required_error: "Comfort level is required",
   }),
-  locationRadius: z.string().min(1, "Location radius is required"),
+  locationRadius: z.coerce.number().min(1, "Radius must be at least 1"),
+  locationRadiusUnit: z.enum(["km", "mile", "meter"], {
+    required_error: "Unit is required",
+  }),
+  address: z.string().optional(),
 });
 
 interface ProfileFormProps {
@@ -107,7 +111,9 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, onSubmitSuccess 
       desiredPartnerPhysical: initialData?.desiredPartnerPhysical || "",
       sexualInterests: initialData?.sexualInterests || [],
       comfortLevel: initialData?.comfortLevel || "chat only",
-      locationRadius: initialData?.locationRadius || "5 km", // Set default unit to km
+      locationRadius: initialData?.locationRadius ? Number(initialData.locationRadius) : 5,
+      locationRadiusUnit: initialData?.locationRadiusUnit || "km",
+      address: initialData?.address || "",
     },
   });
 
@@ -162,6 +168,8 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ initialData, onSubmitSuccess 
       sexual_interests: data.sexualInterests,
       comfort_level: data.comfortLevel,
       location_radius: data.locationRadius,
+      location_radius_unit: data.locationRadiusUnit,
+      address: data.address || null,
       latitude: latitude,
       longitude: longitude,
       updated_at: new Date().toISOString(),

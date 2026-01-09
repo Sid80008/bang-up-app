@@ -15,7 +15,8 @@ export interface UserProfile {
   comfortLevel: "chat only" | "make-out" | "sex";
   latitude?: number;
   longitude?: number;
-  locationRadius: string;
+  locationRadius: number;
+  locationRadiusUnit?: string;
   isVerified: boolean;
 }
 
@@ -79,12 +80,13 @@ export function calculateCompatibility(
 
   // 5. Distance Factor (10 points max) - if location data available
   if (userA.latitude && userA.longitude && userB.latitude && userB.longitude) {
+    const maxDistanceKm = convertRadiusToKm(userA.locationRadius, userA.locationRadiusUnit || "km");
     breakdown.distanceFactor = calculateDistanceFactor(
       userA.latitude,
       userA.longitude,
       userB.latitude,
       userB.longitude,
-      parseLocationRadius(userA.locationRadius)
+      maxDistanceKm
     );
   } else {
     breakdown.distanceFactor = 5; // Default if no location
@@ -229,16 +231,21 @@ function toRad(degrees: number): number {
 /**
  * Parse location radius string to km
  */
-function parseLocationRadius(radius: string): number {
-  const radiusMap: { [key: string]: number } = {
-    "5km": 5,
-    "10km": 10,
-    "25km": 25,
-    "50km": 50,
-    "100km": 100,
-    "anywhere": 10000,
-  };
-  return radiusMap[radius.toLowerCase()] || 50;
+function convertRadiusToKm(radius: number, unit: string): number {
+  if (!radius || radius <= 0) return 50;
+  const u = unit.toLowerCase();
+  switch (u) {
+    case "km":
+      return radius;
+    case "mile":
+    case "miles":
+      return radius * 1.60934;
+    case "meter":
+    case "meters":
+      return radius / 1000;
+    default:
+      return radius;
+  }
 }
 
 /**

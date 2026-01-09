@@ -29,7 +29,9 @@ interface Match {
   desiredPartnerPhysical: string;
   sexualInterests: string[];
   comfortLevel: "chat only" | "make-out" | "sex";
-  locationRadius: string;
+  locationRadius: number;
+  locationRadiusUnit?: string;
+  address?: string;
   isVerified: boolean;
   isApprovedForVisibility: boolean; // This is now required
   isOnline?: boolean; // New field for online status
@@ -49,7 +51,9 @@ type UserProfile = {
   desiredPartnerPhysical: string;
   sexualInterests: string[];
   comfortLevel: "chat only" | "make-out" | "sex";
-  locationRadius: string;
+  locationRadius: number;
+  locationRadiusUnit?: string;
+  address?: string;
   isVerified: boolean;
   latitude?: number;
   longitude?: number;
@@ -94,7 +98,9 @@ const Index = () => {
           desiredPartnerPhysical: data.desired_partner_physical || "",
           sexualInterests: data.sexual_interests || [],
           comfortLevel: (data.comfort_level as "chat only" | "make-out" | "sex") || "chat only",
-          locationRadius: data.location_radius || "",
+          locationRadius: data.location_radius ? Number(data.location_radius) : 0,
+          locationRadiusUnit: data.location_radius_unit || "km",
+          address: data.address || undefined,
           isVerified: data.is_verified || false,
           latitude: data.latitude || undefined,
           longitude: data.longitude || undefined,
@@ -116,7 +122,7 @@ const Index = () => {
           desiredPartnerPhysical: "",
           sexualInterests: [],
           comfortLevel: "chat only",
-          locationRadius: "",
+          locationRadius: 0,
           isVerified: false,
           isApprovedForVisibility: false,
         });
@@ -196,7 +202,9 @@ const Index = () => {
             desiredPartnerPhysical: profile.desired_partner_physical || "N/A",
             sexualInterests: profile.sexual_interests || [],
             comfortLevel: (profile.comfort_level as "chat only" | "make-out" | "sex") || "chat only",
-            locationRadius: profile.location_radius || "N/A",
+            locationRadius: profile.location_radius ? Number(profile.location_radius) : 0,
+            locationRadiusUnit: profile.location_radius_unit || "km",
+            address: profile.address || undefined,
             isVerified: profile.is_verified || false,
             isApprovedForVisibility: false,
             isOnline: true,

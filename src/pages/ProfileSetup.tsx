@@ -68,40 +68,17 @@ const ProfileSetup = () => {
   }, [user, profileCompleted, navigate]);
 
   const handleProfileUpdate = async (data: any) => {
+    // ProfileForm already persists the profile to the DB.
+    // Here we simply navigate to the next screen after a short delay.
     if (!user) {
       toast.error("You must be logged in to update your profile.");
       return;
     }
-    
-    const profileData = {
-      id: user.id,
-      name: data.name,
-      age: data.age,
-      bio: data.bio,
-      body_count: data.bodyCount,
-      body_type: data.bodyType,
-      face_type: data.faceType,
-      gender: data.gender,
-      sexual_orientation: data.sexualOrientation,
-      desired_partner_physical: data.desiredPartnerPhysical,
-      sexual_interests: data.sexualInterests,
-      comfort_level: data.comfortLevel,
-      location_radius: data.locationRadius,
-      updated_at: new Date().toISOString(),
-    };
-    
-    const { error } = await supabase
-      .from("profiles")
-      .upsert(profileData, { onConflict: 'id' });
-    
-    if (error) {
-      console.error("[ProfileSetup] Error updating profile:", error);
-      toast.error("Failed to update your preferences.");
-    } else {
-      toast.success("Profile updated successfully!");
-      // Redirect to AI verification
+
+    toast.success("Profile saved — redirecting...");
+    setTimeout(() => {
       navigate("/ai-verification");
-    }
+    }, 500);
   };
 
   if (!user) {

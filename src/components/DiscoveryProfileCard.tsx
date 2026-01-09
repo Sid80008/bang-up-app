@@ -19,7 +19,9 @@ interface DiscoveryProfileCardProps {
   desiredPartnerPhysical: string;
   sexualInterests: string[];
   comfortLevel: "chat only" | "make-out" | "sex";
-  locationRadius: string;
+  locationRadius: number;
+  locationRadiusUnit?: string;
+  address?: string;
   isVerified: boolean;
   isApprovedForVisibility: boolean;
   onLike?: (id: string) => void;
@@ -42,6 +44,8 @@ const DiscoveryProfileCard: React.FC<DiscoveryProfileCardProps> = ({
   sexualInterests,
   comfortLevel,
   locationRadius,
+  locationRadiusUnit = "km",
+  address,
   isVerified,
   isApprovedForVisibility,
   onLike,
@@ -152,9 +156,12 @@ const DiscoveryProfileCard: React.FC<DiscoveryProfileCardProps> = ({
               {comfortLevel}
             </Badge>
           </div>
-          <div className="flex items-center text-muted-foreground">
-            <MapPin className="h-4 w-4 mr-1" />
-            <span className="text-sm">{locationRadius}</span>
+            <div className="flex items-center text-muted-foreground">
+              <MapPin className="h-4 w-4 mr-1" />
+              <div className="flex flex-col text-sm">
+                <span>{locationRadius} {locationRadiusUnit}</span>
+                {address && <span className="text-xs text-muted-foreground">{address}</span>}
+              </div>
           </div>
         </div>
         <div className="flex justify-around mt-6">

@@ -22,7 +22,9 @@ interface UserProfile {
   desiredPartnerPhysical: string;
   sexualInterests: string[];
   comfortLevel: "chat only" | "make-out" | "sex";
-  locationRadius: string;
+  locationRadius: number;
+  locationRadiusUnit?: string;
+  address?: string;
   isVerified: boolean;
   latitude?: number;
   longitude?: number;
@@ -72,7 +74,9 @@ const SettingsPage = () => {
           desiredPartnerPhysical: data.desired_partner_physical || "",
           sexualInterests: data.sexual_interests || [],
           comfortLevel: data.comfort_level || "chat only",
-          locationRadius: data.location_radius || "",
+          locationRadius: data.location_radius ? Number(data.location_radius) : 0,
+          locationRadiusUnit: data.location_radius_unit || "km",
+          address: data.address || undefined,
           isVerified: data.is_verified || false,
           latitude: data.latitude,
           longitude: data.longitude,

@@ -13,7 +13,8 @@ interface MatchListItemProps {
   gender: string;
   sexualOrientation: string;
   comfortLevel: "chat only" | "make-out" | "sex";
-  locationRadius: string;
+  locationRadius: number;
+  locationRadiusUnit?: string;
   isVerified: boolean;
   chatId: string;
   name?: string;
@@ -31,6 +32,7 @@ const MatchListItem: React.FC<MatchListItemProps> = ({
   sexualOrientation,
   comfortLevel,
   locationRadius,
+  locationRadiusUnit = "km",
   isVerified,
   chatId,
   name,
@@ -100,7 +102,9 @@ const MatchListItem: React.FC<MatchListItemProps> = ({
             {comfortLevel}
           </Badge>
           <MapPin className="h-4 w-4 ml-4 mr-1 text-muted-foreground" />
-          <span className="text-muted-foreground">{locationRadius}</span>
+          <div className="flex flex-col text-sm text-muted-foreground">
+            <span>{locationRadius} {locationRadiusUnit}</span>
+          </div>
         </div>
       </div>
       <div className="flex flex-col items-center sm:items-end space-y-2">

@@ -23,7 +23,8 @@ interface Match {
   gender: string;
   sexualOrientation: string;
   comfortLevel: "chat only" | "make-out" | "sex";
-  locationRadius: string;
+  locationRadius: number;
+  locationRadiusUnit?: string;
   isVerified: boolean;
   chatId: string;
   isApprovedForVisibility: boolean;
@@ -80,7 +81,8 @@ const MatchesPage = () => {
             gender: otherUser.gender || "N/A",
             sexualOrientation: otherUser.sexual_orientation || "N/A",
             comfortLevel: (otherUser.comfort_level as "chat only" | "make-out" | "sex") || "chat only",
-            locationRadius: otherUser.location_radius || "N/A",
+            locationRadius: otherUser.location_radius ? Number(otherUser.location_radius) : 0,
+            locationRadiusUnit: otherUser.location_radius_unit || "km",
             isVerified: otherUser.is_verified || false,
             chatId: chat.id,
             isApprovedForVisibility: chat.visibility_approved,
