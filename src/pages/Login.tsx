@@ -42,7 +42,8 @@ const Login: React.FC = () => {
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <div className="bg-primary p-3 rounded-full">
-              <Heart className="h-8 w-8 text-primary-foreground fill-current" />
+              <img src="/choicematterslogo.png" alt="Choice Matters Logo" className="h-8 w-8" />
+              {/* <Heart className="h-8 w-8 text-primary-foreground fill-current" /> */}
             </div>
           </div>
           <CardTitle className="text-2xl font-bold text-foreground">Welcome to Choice Matters</CardTitle>
