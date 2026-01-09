@@ -58,7 +58,7 @@ const formSchema = z.object({
   bio: z.string().max(500, "Bio must not exceed 500 characters").optional(),
   bodyCount: z.coerce.number().min(0, "Body count cannot be negative").optional(),
   height: z.coerce.number().min(50, "Height must be at least 50cm").max(300, "Height seems too high").optional(),
-  bodyType: z.string().optional(), // Made optional - now only used as a search filter
+  bodyType: z.string().min(1, "Body type is required"),
   faceType: z.string().min(1, "Face type is required"),
   gender: z.string().min(1, "Gender is required"),
   sexualOrientation: z.string().min(1, "Sexual orientation is required"),

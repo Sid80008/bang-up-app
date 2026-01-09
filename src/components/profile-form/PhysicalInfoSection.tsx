@@ -18,15 +18,14 @@ const PhysicalInfoSection: React.FC<PhysicalInfoSectionProps> = ({ form, bodyTyp
         name="bodyType"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Body Type <span className="text-muted-foreground text-sm">(Optional - Set in search filters)</span></FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value || ""}>
+            <FormLabel>Body Type</FormLabel>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
               <FormControl>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select your body type or skip" />
+                  <SelectValue placeholder="Select your body type" />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="">Skip</SelectItem>
                 {bodyTypeOptions.map((type) => (
                   <SelectItem key={type} value={type}>
                     {type}

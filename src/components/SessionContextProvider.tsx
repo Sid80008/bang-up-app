@@ -114,9 +114,8 @@ export const SessionContextProvider: React.FC<{ children: ReactNode }> = ({ chil
         const storedSession = localStorage.getItem("supabase_session");
         if (storedSession) {
           try {
-            const parsedSession = JSON.parse(storedSession);
             // Verify the stored session is still valid
-            const { data: { session: validatedSession }, error } = await supabase.auth.getSession();
+            const { data: { session: validatedSession } } = await supabase.auth.getSession();
             if (validatedSession) {
               setSession(validatedSession);
               setUser(validatedSession.user);
@@ -127,7 +126,7 @@ export const SessionContextProvider: React.FC<{ children: ReactNode }> = ({ chil
               return;
             }
           } catch (e) {
-            console.error("[SessionContext] Error parsing stored session:", e);
+            console.error("[SessionContext] Error validating stored session:", e);
             localStorage.removeItem("supabase_session");
           }
         }
@@ -138,6 +137,13 @@ export const SessionContextProvider: React.FC<{ children: ReactNode }> = ({ chil
         setUser(initialSession?.user || null);
 
         if (initialSession) {
+          // Store the new session
+          try {
+            localStorage.setItem("supabase_session", JSON.stringify(initialSession));
+          } catch (e) {
+            console.error("[SessionContext] Error storing session:", e);
+          }
+          
           await checkProfileCompletion(initialSession.user.id, initialSession);
           if (location.pathname === "/login") {
             navigate("/");
@@ -147,7 +153,6 @@ export const SessionContextProvider: React.FC<{ children: ReactNode }> = ({ chil
         }
       } catch (e) {
         console.error("[SessionContext] Error in getInitialSession:", e);
-      } finally {
         setLoading(false);
       }
     };

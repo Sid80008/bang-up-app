@@ -6,9 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Settings, Edit, LogOut, Trash2 } from "lucide-react";
-import ProfileForm from "@/components/ProfileForm";
 
 interface UserProfile {
   id: string;
@@ -35,7 +33,6 @@ const SettingsPage = () => {
   const navigate = useNavigate();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -122,33 +119,25 @@ const SettingsPage = () => {
 
       if (profileError) {
         console.error("[SettingsPage] Error deleting profile:", profileError);
-        toast.error("Failed to delete account.");
+        toast.error("Failed to delete profile.");
         return;
       }
 
-      // Delete auth user
-      const { error: deleteError } = await supabase.auth.admin.deleteUser(user?.id || "");
+      // Sign out user (client-side deletion only - backend deletion requires admin access)
+      const { error: signoutError } = await supabase.auth.signOut();
 
-      if (deleteError) {
-        console.error("[SettingsPage] Error deleting auth user:", deleteError);
-        toast.error("Failed to delete account.");
+      if (signoutError) {
+        console.error("[SettingsPage] Error signing out:", signoutError);
+        toast.error("Failed to complete account deletion.");
         return;
       }
 
-      toast.success("Account deleted successfully.");
+      toast.success("Account and profile deleted successfully.");
       navigate("/login");
     } catch (error) {
       console.error("[SettingsPage] Unexpected error deleting account:", error);
       toast.error("An unexpected error occurred.");
     }
-  };
-
-  const handleProfileUpdate = (data: any) => {
-    setUserProfile(data);
-    setIsEditDialogOpen(false);
-    toast.success("Profile updated successfully!");
-    // Refetch to ensure consistency
-    fetchUserProfile();
   };
 
   if (sessionLoading || loading) {
@@ -196,44 +185,14 @@ const SettingsPage = () => {
               <CardTitle>Profile Information</CardTitle>
               <p className="text-sm text-foreground/60 mt-2">Your current profile details</p>
             </div>
-            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit Profile
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>Update Your Profile</DialogTitle>
-                </DialogHeader>
-                {userProfile && (
-                  <ProfileForm
-                    initialData={{
-                      id: userProfile.id,
-                      name: userProfile.name,
-                      age: userProfile.age,
-                      bio: userProfile.bio,
-                      bodyCount: userProfile.bodyCount,
-                      height: userProfile.height,
-                      bodyType: userProfile.bodyType,
-                      faceType: userProfile.faceType,
-                      gender: userProfile.gender,
-                      sexualOrientation: userProfile.sexualOrientation,
-                      desiredPartnerPhysical: userProfile.desiredPartnerPhysical,
-                      sexualInterests: userProfile.sexualInterests,
-                      comfortLevel: userProfile.comfortLevel,
-                      locationRadius: userProfile.locationRadius,
-                      isVerified: userProfile.isVerified,
-                      latitude: userProfile.latitude,
-                      longitude: userProfile.longitude,
-                    }}
-                    onSubmitSuccess={handleProfileUpdate}
-                    showOnlyBasicInfo={false}
-                  />
-                )}
-              </DialogContent>
-            </Dialog>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate("/profile-setup")}
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Edit Profile
+            </Button>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
