@@ -30,6 +30,15 @@ export const SessionContextProvider: React.FC<{ children: ReactNode }> = ({ chil
         setSession(currentSession);
         setUser(currentSession?.user || null);
         setLoading(false);
+
+        // Store session in localStorage for persistence
+        if (currentSession) {
+          try {
+            localStorage.setItem("supabase_session", JSON.stringify(currentSession));
+          } catch (e) {
+            console.error("[SessionContext] Error storing session:", e);
+          }
+        }
         
         if (event === "SIGNED_IN") {
           // Check if user has completed profile
@@ -46,7 +55,6 @@ export const SessionContextProvider: React.FC<{ children: ReactNode }> = ({ chil
           const isProfileCompleted = profileData && 
             profileData.name && 
             profileData.age && 
-            profileData.body_type && 
             profileData.face_type && 
             profileData.gender && 
             profileData.sexual_orientation && 
@@ -83,40 +91,79 @@ export const SessionContextProvider: React.FC<{ children: ReactNode }> = ({ chil
               navigate("/");
             }
           }
-        } else if (event === "SIGNED_OUT" && location.pathname !== "/login") {
-          toast.info("You have been logged out.");
-          navigate("/login");
-        } else if (event === "INITIAL_SESSION" && !currentSession && location.pathname !== "/login") {
-          navigate("/login");
+        } else if (event === "SIGNED_OUT") {
+          // Clear session from localStorage
+          try {
+            localStorage.removeItem("supabase_session");
+          } catch (e) {
+            console.error("[SessionContext] Error removing session:", e);
+          }
+          
+          if (location.pathname !== "/login") {
+            toast.info("You have been logged out.");
+            navigate("/login");
+          }
         }
       }
     );
 
-    // Fetch initial session
+    // Fetch initial session - try localStorage first
     const getInitialSession = async () => {
-      const { data: { session: initialSession } } = await supabase.auth.getSession();
-      setSession(initialSession);
-      setUser(initialSession?.user || null);
-      setLoading(false);
-      
-      if (!initialSession && location.pathname !== "/login") {
-        navigate("/login");
-      } else if (initialSession) {
-        // Check profile completion for existing sessions
-        const { data: profileData, error: profileError } = await supabase
-          .from("profiles")
-          .select("name, age, body_type, face_type, gender, sexual_orientation, desired_partner_physical, sexual_interests, comfort_level, location_radius")
-          .eq("id", initialSession.user.id)
-          .single();
-        
-        if (profileError) {
-          console.error("[SessionContext] Error fetching profile:", profileError);
+      try {
+        // Try to get session from localStorage first
+        const storedSession = localStorage.getItem("supabase_session");
+        if (storedSession) {
+          try {
+            const parsedSession = JSON.parse(storedSession);
+            // Verify the stored session is still valid
+            const { data: { session: validatedSession }, error } = await supabase.auth.getSession();
+            if (validatedSession) {
+              setSession(validatedSession);
+              setUser(validatedSession.user);
+              setLoading(false);
+              
+              // Fetch profile data
+              await checkProfileCompletion(validatedSession.user.id, validatedSession);
+              return;
+            }
+          } catch (e) {
+            console.error("[SessionContext] Error parsing stored session:", e);
+            localStorage.removeItem("supabase_session");
+          }
         }
+
+        // If no valid stored session, get fresh session from Supabase
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        setSession(initialSession);
+        setUser(initialSession?.user || null);
+
+        if (initialSession) {
+          await checkProfileCompletion(initialSession.user.id, initialSession);
+          if (location.pathname === "/login") {
+            navigate("/");
+          }
+        } else if (location.pathname !== "/login") {
+          navigate("/login");
+        }
+      } catch (e) {
+        console.error("[SessionContext] Error in getInitialSession:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const checkProfileCompletion = async (userId: string, session: Session) => {
+      try {
+        // Check profile completion
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("name, age, face_type, gender, sexual_orientation, desired_partner_physical, sexual_interests, comfort_level, location_radius")
+          .eq("id", userId)
+          .single();
         
         const isProfileCompleted = profileData && 
           profileData.name && 
           profileData.age && 
-          profileData.body_type && 
           profileData.face_type && 
           profileData.gender && 
           profileData.sexual_orientation && 
@@ -127,27 +174,18 @@ export const SessionContextProvider: React.FC<{ children: ReactNode }> = ({ chil
           profileData.location_radius;
         
         setProfileCompleted(!!isProfileCompleted);
-        
+
         // Check AI verification
-        const { data: verificationData, error: verificationError } = await supabase
+        const { data: verificationData } = await supabase
           .from("profiles")
           .select("is_verified")
-          .eq("id", initialSession.user.id)
+          .eq("id", userId)
           .single();
-        
-        if (verificationError) {
-          console.error("[SessionContext] Error fetching verification data:", verificationError);
-        }
         
         const isAiVerified = verificationData && verificationData.is_verified;
         setAiVerified(!!isAiVerified);
-        
-        // Redirect if needed
-        if (!isProfileCompleted && location.pathname !== "/profile-setup" && location.pathname !== "/login") {
-          navigate("/profile-setup");
-        } else if (!isAiVerified && location.pathname !== "/ai-verification" && location.pathname !== "/profile-setup" && location.pathname !== "/login") {
-          navigate("/ai-verification");
-        }
+      } catch (e) {
+        console.error("[SessionContext] Error checking profile completion:", e);
       }
     };
 

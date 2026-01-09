@@ -137,82 +137,101 @@ const Index = () => {
 
     setMatchesLoading(true);
 
-    // Fetch users the current user has already interacted with
-    const { data: interactions, error: interactionsError } = await supabase
-      .from("user_interactions")
-      .select("target_user_id")
-      .eq("user_id", user.id);
+    try {
+      // Fetch users the current user has already interacted with
+      const { data: interactions, error: interactionsError } = await supabase
+        .from("user_interactions")
+        .select("target_user_id")
+        .eq("user_id", user.id);
 
-    if (interactionsError) {
-      console.error("[IndexPage] Error fetching user interactions:", interactionsError);
-      toast.error("Failed to load interactions.");
-      setMatchesLoading(false);
-      return;
-    }
+      if (interactionsError) {
+        console.error("[IndexPage] Error fetching user interactions:", interactionsError);
+        toast.error("Failed to load interactions.");
+        setMatchesLoading(false);
+        return;
+      }
 
-    const interactedUserIds = interactions?.map(i => i.target_user_id) || [];
+      const interactedUserIds = interactions?.map(i => i.target_user_id) || [];
 
-    // Fetch other profiles, excluding current user and already interacted users
-    const { data: profiles, error: profilesError } = await supabase
-      .from("profiles")
-      .select("*")
-      .neq("id", user.id)
-      .not("id", "in", `(${interactedUserIds.join(',')})`);
+      // Build query to exclude current user
+      let query = supabase
+        .from("profiles")
+        .select("*")
+        .neq("id", user.id);
 
-    if (profilesError) {
-      console.error("[IndexPage] Error fetching potential matches:", profilesError);
-      toast.error("Failed to load potential matches.");
+      // Only add the "not in" filter if there are interacted users
+      if (interactedUserIds.length > 0) {
+        query = query.not("id", "in", `(${interactedUserIds.map(id => `'${id}'`).join(',')})`);
+      }
+
+      const { data: profiles, error: profilesError } = await query;
+
+      if (profilesError) {
+        console.error("[IndexPage] Error fetching potential matches:", profilesError);
+        toast.error("Failed to load potential matches.");
+        setPotentialMatches([]);
+      } else {
+        const filteredMatches: Match[] = (profiles || [])
+          .filter(profile => {
+            // Ensure profile has basic info
+            if (!profile.sexual_interests || profile.sexual_interests.length === 0) {
+              return false;
+            }
+            // Basic interest matching: at least one shared sexual interest
+            return currentUserProfile.sexualInterests.some(interest =>
+              profile.sexual_interests.includes(interest)
+            );
+          })
+          .map(profile => ({
+            id: profile.id,
+            name: profile.name || "Anonymous",
+            age: profile.age || 0,
+            bio: profile.bio || "",
+            bodyCount: profile.body_count || 0,
+            height: profile.height || 0,
+            bodyType: profile.body_type || "N/A",
+            faceType: profile.face_type || "N/A",
+            gender: profile.gender || "N/A",
+            sexualOrientation: profile.sexual_orientation || "N/A",
+            desiredPartnerPhysical: profile.desired_partner_physical || "N/A",
+            sexualInterests: profile.sexual_interests || [],
+            comfortLevel: (profile.comfort_level as "chat only" | "make-out" | "sex") || "chat only",
+            locationRadius: profile.location_radius || "N/A",
+            isVerified: profile.is_verified || false,
+            isApprovedForVisibility: false,
+            isOnline: true,
+          }));
+
+        setPotentialMatches(filteredMatches);
+        console.log(`[IndexPage] Loaded ${filteredMatches.length} potential matches`);
+      }
+    } catch (error) {
+      console.error("[IndexPage] Unexpected error fetching matches:", error);
+      toast.error("An unexpected error occurred while loading profiles.");
       setPotentialMatches([]);
-    } else {
-      const filteredMatches: Match[] = (profiles || [])
-        .filter(profile => {
-          // Basic interest matching: at least one shared sexual interest
-          if (!profile.sexual_interests || profile.sexual_interests.length === 0) {
-            return false;
-          }
-          return currentUserProfile.sexualInterests.some(interest =>
-            profile.sexual_interests.includes(interest)
-          );
-        })
-        .map(profile => ({
-          id: profile.id,
-          name: profile.name || "Anonymous",
-          age: profile.age || 0,
-          bio: profile.bio || "",
-          bodyCount: profile.body_count || 0,
-          height: profile.height || 0, // Added height field
-          bodyType: profile.body_type || "N/A",
-          faceType: profile.face_type || "N/A",
-          gender: profile.gender || "N/A",
-          sexualOrientation: profile.sexual_orientation || "N/A",
-          desiredPartnerPhysical: profile.desired_partner_physical || "N/A",
-          sexualInterests: profile.sexual_interests || [],
-          comfortLevel: (profile.comfort_level as "chat only" | "make-out" | "sex") || "chat only",
-          locationRadius: profile.location_radius || "N/A",
-          isVerified: profile.is_verified || false,
-          isApprovedForVisibility: false, // Default to false for discovery profiles
-          isOnline: true, // For demo purposes, all matches are shown as online
-        }));
-
-      setPotentialMatches(filteredMatches);
     }
+
     setMatchesLoading(false);
   };
 
   useEffect(() => {
-    // Redirect if profile not completed or not verified
-    if (user && !profileCompleted) {
+    // Only redirect if profile is not completed on first load
+    // The SessionContextProvider handles this on login
+    if (user && !profileCompleted && sessionLoading === false) {
       navigate("/profile-setup");
       return;
     }
 
-    if (user && profileCompleted && !aiVerified) {
+    if (user && profileCompleted && !aiVerified && sessionLoading === false) {
       navigate("/ai-verification");
       return;
     }
 
-    fetchUserProfile();
-  }, [user, profileCompleted, aiVerified, navigate]);
+    // If user exists and all checks are complete, fetch profile
+    if (user && profileCompleted && aiVerified) {
+      fetchUserProfile();
+    }
+  }, [user, sessionLoading]);
 
   useEffect(() => {
     if (userProfile && user) {

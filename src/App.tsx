@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import { SessionContextProvider } from "./components/SessionContextProvider";
 import ProfileSetup from "./pages/ProfileSetup";
 import AIVerificationPage from "./pages/AIVerificationPage";
+import SettingsPage from "./pages/SettingsPage";
 import { ErrorBoundary } from "react-error-boundary";
 import { useEffect } from "react";
 
@@ -64,6 +65,7 @@ const AppContent = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/profile-setup" element={<ProfileSetup />} />
             <Route path="/ai-verification" element={<AIVerificationPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
